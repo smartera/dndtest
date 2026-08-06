@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>성향 좌표 · D&amp;D 9성향 테스트</title>
+<meta name="description" content="질서-중립-혼돈 × 선-중립-악. 20개 문항으로 자신의 좌표를 찾고, 9성향 해설을 읽는 페이지.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --felt:#0E1A15;
+  --felt2:#14241D;
+  --felt3:#1A2E25;
+  --edge:#2C453A;
+  --bone:#EDE7D8;
+  --bone-dim:#95A79B;
+  --brass:#C9A227;
+  --brass-dim:#8A7124;
+  --law:#86A9C0;
+  --chaos:#C98A62;
+  --pad:clamp(20px,5vw,64px);
+  --display:"Gowun Batang",Batang,serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--felt);color:var(--bone);
+  font-family:var(--body);font-weight:300;line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(201,162,39,.07), transparent 60%),
+    radial-gradient(90% 60% at 10% 100%, rgba(134,169,192,.05), transparent 60%);
+  background-attachment:fixed;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--pad)}
+h1,h2,h3,h4{font-family:var(--display);font-weight:700;line-height:1.25;margin:0}
+p{margin:0}
+button{font-family:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.eyebrow{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--brass);
+}
+.rule{height:1px;background:linear-gradient(90deg,var(--edge),transparent);border:0;margin:0}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(48px,9vh,96px) 0 clamp(40px,7vh,72px)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,64px);align-items:center}
+.hero h1{font-size:clamp(2.4rem,6.4vw,4rem);letter-spacing:-.01em}
+.hero h1 em{font-style:normal;color:var(--brass)}
+.hero .lede{margin-top:20px;font-size:1.02rem;color:#CFD6CC;max-width:44ch}
+.hero .meta{margin-top:26px;font-family:var(--mono);font-size:.72rem;color:var(--bone-dim);letter-spacing:.08em}
+.cta-row{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  border:1px solid var(--brass-dim);background:transparent;color:var(--bone);
+  padding:13px 26px;border-radius:2px;font-size:.9rem;letter-spacing:.02em;
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.btn:hover{background:rgba(201,162,39,.12);border-color:var(--brass)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--brass);color:#14100A;border-color:var(--brass);font-weight:600}
+.btn-primary:hover{background:#DCB431;border-color:#DCB431}
+.btn-ghost{border-color:var(--edge);color:var(--bone-dim)}
+.btn-ghost:hover{color:var(--bone)}
+
+/* ---------- the plate (signature) ---------- */
+.plate-shell{position:relative}
+.plate{
+  position:relative;aspect-ratio:1;width:100%;
+  border:1px solid var(--edge);background:var(--felt2);
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  box-shadow:0 0 0 6px rgba(0,0,0,.25), 0 24px 60px -30px #000;
+}
+.cell{
+  border-right:1px solid var(--edge);border-bottom:1px solid var(--edge);
+  display:flex;flex-direction:column;justify-content:flex-end;gap:2px;
+  padding:9px 10px;position:relative;transition:background .5s ease;
+}
+.cell:nth-child(3n){border-right:0}
+.cell:nth-child(n+7){border-bottom:0}
+.cell .code{font-family:var(--mono);font-size:.62rem;color:var(--bone-dim);letter-spacing:.12em}
+.cell .ko{font-family:var(--display);font-size:.82rem;color:#B9C4B8;line-height:1.3}
+.cell[data-col="0"]{background:rgba(134,169,192,.045)}
+.cell[data-col="2"]{background:rgba(201,138,98,.045)}
+.cell[data-row="0"]{box-shadow:inset 0 0 40px rgba(237,231,216,.035)}
+.cell[data-row="2"]{box-shadow:inset 0 0 40px rgba(0,0,0,.35)}
+.cell.lit{background:rgba(201,162,39,.16)!important}
+.cell.lit .code{color:var(--brass)}
+.cell.lit .ko{color:var(--bone)}
+.marker{
+  position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;left:50%;top:50%;
+  border-radius:50%;background:var(--brass);
+  box-shadow:0 0 0 4px rgba(201,162,39,.18),0 0 22px 6px rgba(201,162,39,.35);
+  transition:left .7s cubic-bezier(.22,1,.36,1),top .7s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;z-index:2;
+}
+.marker.idle{animation:drift 9s ease-in-out infinite}
+@keyframes drift{
+  0%,100%{transform:translate(0,0)}
+  25%{transform:translate(7px,-6px)}
+  50%{transform:translate(-5px,6px)}
+  75%{transform:translate(5px,4px)}
+}
+.axis{position:absolute;font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;color:var(--bone-dim)}
+.axis.top{top:-24px;left:0;right:0;display:flex;justify-content:space-between}
+.axis.side{top:0;bottom:0;left:-16px;display:flex;flex-direction:column;justify-content:space-between;writing-mode:vertical-rl}
+.axis .law{color:var(--law)}
+.axis .chaos{color:var(--chaos)}
+
+/* ---------- sections ---------- */
+section{padding:clamp(56px,9vh,104px) 0;border-top:1px solid var(--edge)}
+.sec-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:34px}
+.sec-head h2{font-size:clamp(1.6rem,3.6vw,2.3rem)}
+.sec-head .note{color:var(--bone-dim);font-size:.88rem}
+
+/* axis explainer */
+.axis-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(18px,3vw,34px)}
+.axis-card{border-left:2px solid var(--edge);padding:4px 0 4px 22px}
+.axis-card.l{border-left-color:var(--law)}
+.axis-card.g{border-left-color:var(--brass)}
+.axis-card h3{font-size:1.22rem;margin-bottom:10px}
+.axis-card p{color:#C3CCC3;font-size:.95rem}
+.axis-card dl{margin:18px 0 0;display:grid;gap:11px}
+.axis-card dt{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--brass)}
+.axis-card dd{margin:2px 0 0;font-size:.9rem;color:#B7C1B7}
+
+/* ---------- test ---------- */
+.test-layout{display:grid;grid-template-columns:1fr 300px;gap:clamp(28px,5vw,56px);align-items:start}
+.q-card{border:1px solid var(--edge);background:var(--felt2);padding:clamp(24px,4vw,40px);min-height:380px;display:flex;flex-direction:column}
+.q-top{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--bone-dim)}
+.bar{height:2px;background:var(--edge);margin:14px 0 26px;position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--brass);width:0;transition:width .4s ease}
+.q-text{font-family:var(--display);font-size:clamp(1.25rem,2.6vw,1.6rem);line-height:1.5}
+.opts{margin-top:26px;display:grid;gap:10px}
+.opt{
+  text-align:left;border:1px solid var(--edge);background:transparent;
+  padding:15px 18px;border-radius:2px;font-size:.95rem;font-weight:300;line-height:1.55;
+  display:flex;gap:14px;align-items:flex-start;
+  transition:border-color .18s ease,background .18s ease,padding-left .18s ease;
+}
+.opt:hover{border-color:var(--brass);background:rgba(201,162,39,.07);padding-left:22px}
+.opt .pip{font-family:var(--mono);font-size:.7rem;color:var(--brass);padding-top:3px;flex:none}
+.q-nav{margin-top:auto;padding-top:22px;display:flex;justify-content:space-between;align-items:center}
+.link-btn{background:none;border:0;padding:0;color:var(--bone-dim);font-size:.82rem;text-decoration:underline;text-underline-offset:4px}
+.link-btn:hover{color:var(--bone)}
+.side-plate .plate{aspect-ratio:1}
+.side-plate .cell .ko{display:none}
+.side-note{margin-top:34px;font-family:var(--mono);font-size:.7rem;color:var(--bone-dim);letter-spacing:.06em;display:grid;gap:6px}
+.side-note b{color:var(--bone);font-weight:500}
+
+/* ---------- result ---------- */
+.result-head{display:grid;grid-template-columns:1fr 340px;gap:clamp(28px,5vw,56px);align-items:center}
+.res-code{font-family:var(--mono);font-size:.74rem;letter-spacing:.24em;color:var(--brass)}
+.res-name{font-size:clamp(2.2rem,6vw,3.4rem);margin-top:12px}
+.res-epithet{font-family:var(--display);font-size:1.35rem;color:var(--brass);margin-top:6px}
+.res-line{margin-top:20px;font-size:1.05rem;color:#D3DAD1;max-width:46ch}
+.scores{margin-top:28px;display:grid;gap:16px;max-width:420px}
+.score-row{display:grid;gap:7px}
+.score-lab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--bone-dim)}
+.track{height:6px;background:var(--felt3);position:relative;border:1px solid var(--edge)}
+.track b{position:absolute;top:-4px;width:2px;height:calc(100% + 8px);background:var(--brass)}
+.track u{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--edge);text-decoration:none}
+.res-body{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(20px,3.4vw,40px);margin-top:clamp(40px,6vw,64px)}
+.block h4{font-family:var(--mono);font-weight:500;font-size:.7rem;letter-spacing:.2em;color:var(--brass);text-transform:uppercase;margin-bottom:12px}
+.block p,.block li{font-size:.95rem;color:#C3CCC3}
+.block ul{margin:0;padding-left:18px;display:grid;gap:7px}
+.people{list-style:none;padding-left:0!important;gap:14px!important}
+.people li{display:grid;gap:3px;border-left:1px solid var(--edge);padding-left:14px}
+.people b{font-family:var(--display);font-weight:700;color:var(--bone);font-size:1rem}
+.people .tag{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;color:var(--brass);
+  border:1px solid var(--brass-dim);padding:1px 5px;margin-left:7px;vertical-align:2px}
+.people .d{font-size:.88rem;color:#B7C1B7;line-height:1.6}
+.opt.picked{border-color:var(--brass);background:rgba(201,162,39,.13)}
+.opt.picked .pip{color:var(--bone)}
+
+/* ---------- 궁합 ---------- */
+.pair-layout{display:grid;grid-template-columns:1fr 320px;gap:clamp(28px,5vw,56px);align-items:start}
+.picker{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:30px}
+.picker label{display:grid;gap:7px;font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;color:var(--brass)}
+.picker select{
+  font-family:var(--display);font-size:1.02rem;color:var(--bone);background:var(--felt2);
+  border:1px solid var(--edge);padding:11px 14px;border-radius:2px;min-width:170px;
+}
+.picker select:hover{border-color:var(--brass)}
+.picker .x{font-family:var(--display);color:var(--bone-dim);padding-bottom:12px;font-size:1.1rem}
+.picker .btn{padding:10px 16px;font-size:.8rem}
+.grade{
+  display:inline-block;font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;
+  border:1px solid currentColor;padding:4px 11px;margin-bottom:14px;
+}
+.grade[data-g="동맹"]{color:var(--brass)}
+.grade[data-g="갈등하는 동맹"]{color:#B9A96B}
+.grade[data-g="협력 가능"]{color:var(--law)}
+.grade[data-g="불안정"]{color:#B08A6A}
+.grade[data-g="충돌"]{color:var(--chaos)}
+.pair-title{font-family:var(--display);font-size:clamp(1.5rem,3.4vw,2rem);font-weight:700;line-height:1.3}
+.pair-who{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--bone-dim);margin-top:10px}
+.pair-blocks{display:grid;gap:26px;margin-top:28px}
+.pair-blocks .block p{font-size:.96rem;line-height:1.75}
+.pair-note{border-left:2px solid var(--brass);padding:2px 0 2px 18px;margin-top:26px}
+.pair-note p{font-family:var(--display);font-size:1.02rem;color:#D3DAD1;line-height:1.65}
+.brings{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:26px}
+.brings>div{border-top:1px solid var(--edge);padding-top:14px}
+.brings h5{font-family:var(--mono);font-weight:500;font-size:.64rem;letter-spacing:.16em;color:var(--brass);margin:0 0 9px}
+.brings p{font-size:.9rem;color:#B7C1B7;line-height:1.7}
+.pin{
+  position:absolute;top:8px;right:9px;width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.62rem;font-weight:500;
+  background:var(--brass);color:#14100A;
+}
+.pin.b{background:var(--law);color:#0E1A15}
+.pin.both{width:auto;padding:0 8px;border-radius:11px;letter-spacing:.06em}
+.pair-actions{margin-top:30px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.block+.block{margin-top:0}
+.pairing{display:grid;gap:14px}
+.pair{display:grid;grid-template-columns:78px 1fr;gap:12px;align-items:baseline}
+.pair span{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--bone-dim)}
+.share{margin-top:clamp(40px,6vw,64px);border:1px solid var(--edge);background:var(--felt2);padding:24px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.share p{font-size:.9rem;color:var(--bone-dim)}
+.share .btns{display:flex;gap:10px;flex-wrap:wrap}
+.toast{font-family:var(--mono);font-size:.7rem;color:var(--brass);letter-spacing:.1em;opacity:0;transition:opacity .3s}
+.toast.on{opacity:1}
+
+/* ---------- codex ---------- */
+.codex{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cx{
+  border:1px solid var(--edge);background:var(--felt2);padding:20px 18px;text-align:left;
+  display:grid;gap:8px;align-content:start;transition:border-color .2s ease,background .2s ease,transform .2s ease;
+}
+.cx:hover{border-color:var(--brass);background:var(--felt3);transform:translateY(-2px)}
+.cx[aria-expanded="true"]{border-color:var(--brass);background:rgba(201,162,39,.09)}
+.cx .c{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;color:var(--brass)}
+.cx .n{font-family:var(--display);font-size:1.12rem;font-weight:700}
+.cx .e{font-size:.85rem;color:var(--bone-dim);line-height:1.5}
+.cx-detail{grid-column:1/-1;border:1px solid var(--brass-dim);background:var(--felt2);padding:clamp(22px,3.4vw,34px);display:none}
+.cx-detail.on{display:block}
+.cx-detail h3{font-size:1.5rem}
+.cx-detail .sub{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;color:var(--brass);margin-bottom:10px}
+.cx-detail .body{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:20px}
+
+/* ---------- footnote ---------- */
+.foot{padding:clamp(44px,7vh,72px) 0 clamp(60px,9vh,96px);border-top:1px solid var(--edge)}
+.foot p{font-size:.86rem;color:var(--bone-dim);max-width:66ch}
+.foot p+p{margin-top:12px}
+.foot .eyebrow{display:block;margin-bottom:16px}
+
+.hidden{display:none!important}
+
+@media (max-width:860px){
+  .hero-grid,.test-layout,.result-head,.axis-cards,.res-body,.cx-detail .body,.pair-layout,.brings{grid-template-columns:1fr}
+  .hero .plate-shell{max-width:420px;margin:8px auto 0}
+  .side-plate{max-width:300px;margin:0 auto}
+  .pair-layout .plate-shell{max-width:340px;margin:8px auto 0}
+  .picker{gap:10px}
+  .picker select{min-width:0;flex:1}
+  .codex{grid-template-columns:1fr}
+  .cell .ko{font-size:.78rem}
+  .axis.side{left:-14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<div class="wrap">
+<header class="hero">
+  <div class="hero-grid">
+    <div>
+      <span class="eyebrow">Alignment · 질서와 선의 좌표계</span>
+      <h1>당신은 이 판 위<br>어느 칸에<em> 서 있습니까</em></h1>
+      <p class="lede">D&amp;D는 사람의 성향을 두 개의 축으로 잘라 아홉 칸을 만듭니다. 규칙을 어떻게 대하는가(질서–혼돈), 남을 어떻게 대하는가(선–악). 스무 개의 상황에 답하면 판 위의 좌표가 정해집니다.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" id="start">테스트 시작</button>
+        <a class="btn btn-ghost" href="#codex" style="text-decoration:none">9성향 먼저 읽기</a>
+      </div>
+      <p class="meta">문항 20개 · 소요 4분 · 결과는 링크로 공유</p>
+    </div>
+    <div class="plate-shell">
+      <div class="axis top"><span class="law">LAWFUL 질서</span><span class="chaos">혼돈 CHAOTIC</span></div>
+      <div class="axis side"><span>GOOD 선</span><span>악 EVIL</span></div>
+      <div class="plate" id="heroPlate"></div>
+    </div>
+  </div>
+</header>
+</div>
+
+<!-- ============ 축 설명 ============ -->
+<section id="axes">
+<div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">01</span>
+    <h2>두 개의 축</h2>
+    <p class="note">1970년대 D&amp;D가 마이클 무어콕의 &lsquo;질서 대 혼돈&rsquo; 구도에 선악 축을 겹치면서 만들어진 3×3 체계입니다.</p>
+  </div>
+  <div class="axis-cards">
+    <div class="axis-card l">
+      <h3>질서 — 중립 — 혼돈</h3>
+      <p>이 축은 착함과 무관합니다. <b>무엇을 근거로 판단하는가</b>를 묻습니다. 밖에 있는 규칙과 약속을 근거로 삼는가, 아니면 그때그때의 내 판단을 근거로 삼는가.</p>
+      <dl>
+        <dt>Lawful 질서</dt><dd>규범·절차·약속·위계를 신뢰한다. 예측 가능하고 일관되지만, 규칙이 틀렸을 때 늦게 반응한다.</dd>
+        <dt>Neutral 중립</dt><dd>규칙은 도구다. 쓸모 있으면 따르고 아니면 조정한다. 유연하지만 기준이 흔들려 보일 수 있다.</dd>
+        <dt>Chaotic 혼돈</dt><dd>개인의 양심·자유·직관이 먼저다. 파괴적이라는 뜻이 아니라 <b>외부 권위에 자동으로 따르지 않는다</b>는 뜻이다.</dd>
+      </dl>
+    </div>
+    <div class="axis-card g">
+      <h3>선 — 중립 — 악</h3>
+      <p>이 축은 <b>타인의 이익을 어디까지 내 계산에 넣는가</b>를 묻습니다. 도덕적 판결이 아니라, 결정의 무게중심이 어디에 놓이는지를 봅니다.</p>
+      <dl>
+        <dt>Good 선</dt><dd>남의 생명과 존엄이 내 손해보다 앞선다. 손해를 감수하고 돕는 쪽으로 기운다.</dd>
+        <dt>Neutral 중립</dt><dd>내 사람과 내 삶이 기준이다. 이유 없이 해치지도, 크게 희생하지도 않는다.</dd>
+        <dt>Evil 악</dt><dd>필요하면 타인의 손해를 감수시킨다. 광기가 아니라 <b>남의 이익에 가중치를 거의 두지 않는 계산</b>이다.</dd>
+      </dl>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============ TEST ============ -->
+<section id="test" class="hidden">
+<div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">02</span>
+    <h2>20문항</h2>
+    <p class="note">가장 하고 싶은 답이 아니라, 실제로 할 것 같은 답을 고르세요.</p>
+  </div>
+  <div class="test-layout">
+    <div class="q-card">
+      <div class="q-top"><span id="qCount">문항 01 / 20</span><span id="qAxis">질서 — 혼돈</span></div>
+      <div class="bar"><i id="qBar"></i></div>
+      <p class="q-text" id="qText" aria-live="polite"></p>
+      <div class="opts" id="qOpts"></div>
+      <div class="q-nav">
+        <button class="link-btn hidden" id="back">← 이전 문항</button>
+        <span></span>
+        <button class="link-btn" id="restart1">처음부터</button>
+      </div>
+    </div>
+    <div>
+      <div class="side-plate plate-shell">
+        <div class="axis top"><span class="law">질서</span><span class="chaos">혼돈</span></div>
+        <div class="axis side"><span>선</span><span>악</span></div>
+        <div class="plate" id="livePlate"></div>
+      </div>
+      <div class="side-note">
+        <span>현재 좌표</span>
+        <b id="liveCoord">L/C 0 · G/E 0</b>
+        <span id="liveCell">아직 판 한가운데</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============ RESULT ============ -->
+<section id="result" class="hidden">
+<div class="wrap">
+  <div class="sec-head"><span class="eyebrow">03</span><h2>결과</h2></div>
+  <div class="result-head">
+    <div>
+      <div class="res-code" id="rCode"></div>
+      <h3 class="res-name" id="rName"></h3>
+      <div class="res-epithet" id="rEpithet"></div>
+      <p class="res-line" id="rLine"></p>
+      <div class="scores">
+        <div class="score-row">
+          <div class="score-lab"><span>질서</span><span id="rLScore" style="color:var(--brass)"></span><span>혼돈</span></div>
+          <div class="track"><u></u><b id="rLBar"></b></div>
+        </div>
+        <div class="score-row">
+          <div class="score-lab"><span>선</span><span id="rGScore" style="color:var(--brass)"></span><span>악</span></div>
+          <div class="track"><u></u><b id="rGBar"></b></div>
+        </div>
+        <p id="rEdge" style="font-family:var(--mono);font-size:.7rem;color:var(--bone-dim);letter-spacing:.06em"></p>
+      </div>
+    </div>
+    <div class="plate-shell">
+      <div class="axis top"><span class="law">질서</span><span class="chaos">혼돈</span></div>
+      <div class="axis side"><span>선</span><span>악</span></div>
+      <div class="plate" id="resPlate"></div>
+    </div>
+  </div>
+
+  <div class="res-body">
+    <div>
+      <div class="block"><h4>행동 원리</h4><ul id="rPrinciples"></ul></div>
+      <div class="block" style="margin-top:32px"><h4>강점</h4><p id="rStrength"></p></div>
+      <div class="block" style="margin-top:32px"><h4>그늘</h4><p id="rShadow"></p></div>
+    </div>
+    <div>
+      <div class="block"><h4>이 성향이 부서지는 순간</h4><p id="rBreak"></p></div>
+      <div class="block" style="margin-top:32px"><h4>관계</h4>
+        <div class="pairing">
+          <div class="pair"><span>잘 맞음</span><p id="rAlly"></p></div>
+          <div class="pair"><span>부딪힘</span><p id="rFriction"></p></div>
+        </div>
+      </div>
+      <div class="block" style="margin-top:32px"><h4>어울리는 클래스</h4><p id="rClass"></p></div>
+      <div class="block" style="margin-top:32px"><h4>이 칸에 서 있던 사람들</h4>
+        <ul id="rPeople" class="people"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="share">
+    <p>결과 링크에 좌표가 담깁니다. 열면 바로 이 화면이 보입니다.</p>
+    <div class="btns">
+      <span class="toast" id="toast">복사됨</span>
+      <button class="btn" id="toPair">이 성향으로 궁합 보기</button>
+      <button class="btn" id="copyLink">결과 링크 복사</button>
+      <button class="btn" id="copyText">결과 요약 복사</button>
+      <button class="btn btn-ghost" id="restart2">다시 하기</button>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============ PAIR ============ -->
+<section id="pair">
+<div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">04</span>
+    <h2>두 사람</h2>
+    <p class="note">두 성향을 고르면 어디서 맞고 어디서 부딪히는지 보여줍니다.</p>
+  </div>
+  <div class="pair-layout">
+    <div>
+      <div class="picker">
+        <label>A <select id="selA"></select></label>
+        <span class="x">×</span>
+        <label>B <select id="selB"></select></label>
+        <button class="btn btn-ghost" id="swap">↔ 바꾸기</button>
+      </div>
+      <div id="pairOut"></div>
+      <div class="pair-actions">
+        <span class="toast" id="toast2">복사됨</span>
+        <button class="btn" id="copyPair">이 조합 링크 복사</button>
+      </div>
+    </div>
+    <div class="plate-shell">
+      <div class="axis top"><span class="law">질서</span><span class="chaos">혼돈</span></div>
+      <div class="axis side"><span>선</span><span>악</span></div>
+      <div class="plate" id="pairPlate"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============ CODEX ============ -->
+<section id="codex">
+<div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">05</span>
+    <h2>아홉 칸 도감</h2>
+    <p class="note">판 모양 그대로 배치했습니다. 칸을 누르면 해설이 열립니다.</p>
+  </div>
+  <div class="codex" id="codexGrid"></div>
+</div>
+</section>
+
+<!-- ============ FOOT ============ -->
+<div class="wrap">
+<footer class="foot">
+  <span class="eyebrow">읽는 법</span>
+  <p>점수는 절대 기준이 아니라 상대 기준입니다. 사람들의 답은 원래 &lsquo;선&rsquo;과 &lsquo;질서&rsquo; 쪽으로 크게 쏠리기 때문에, 그대로 재면 대부분 질서 선 한 칸에 몰립니다. 그래서 문턱을 그쪽으로 밀어 올렸습니다. 여기서 &lsquo;악&rsquo;은 나쁜 사람이라는 뜻이 아니라 <b>같은 문항에서 자기 몫을 더 자주 택한 쪽</b>, &lsquo;혼돈&rsquo;은 <b>규칙보다 자기 판단을 더 자주 택한 쪽</b>이라는 뜻입니다.</p>
+  <p>성향은 사람을 가두는 상자가 아니라 &lsquo;평소의 기본값&rsquo;에 가깝습니다. D&amp;D에서도 캐릭터는 사건을 겪으며 칸을 옮겨 다니고, 최근 판본은 성향을 규칙적 제약이 아니라 연기의 참고선으로 다룹니다. 경계에 걸린 결과라면 두 칸을 모두 읽어보는 편이 더 정확합니다.</p>
+</footer>
+</div>
+
+<script>
+/* ================= 데이터 ================= */
+const CELLS = [
+  {k:'LG',ko:'질서 선',en:'LAWFUL GOOD'},{k:'NG',ko:'중립 선',en:'NEUTRAL GOOD'},{k:'CG',ko:'혼돈 선',en:'CHAOTIC GOOD'},
+  {k:'LN',ko:'질서 중립',en:'LAWFUL NEUTRAL'},{k:'TN',ko:'진정 중립',en:'TRUE NEUTRAL'},{k:'CN',ko:'혼돈 중립',en:'CHAOTIC NEUTRAL'},
+  {k:'LE',ko:'질서 악',en:'LAWFUL EVIL'},{k:'NE',ko:'중립 악',en:'NEUTRAL EVIL'},{k:'CE',ko:'혼돈 악',en:'CHAOTIC EVIL'}
+];
+
+const A = {
+LG:{name:'질서 선',en:'Lawful Good',epithet:'수호자',
+ line:'좋은 질서가 좋은 사람을 만든다고 믿습니다. 약속과 절차를 지키는 일 자체가 남을 지키는 방법이라고 생각하는 쪽입니다.',
+ principles:['먼저 규칙을 확인하고, 규칙 안에서 최선을 찾는다.','내가 한 말은 불리해져도 그대로 지킨다.','제도가 잘못됐다면 어기는 대신 고치는 절차를 밟는다.'],
+ strength:'예측 가능성. 이 사람이 하겠다고 한 일은 대체로 그대로 일어납니다. 위기에서 사람들이 기준점으로 삼는 자리에 서게 됩니다.',
+ shadow:'규칙과 선의가 갈라질 때 판단이 느려집니다. 형식을 지켰다는 사실만으로 결과의 책임을 면제받았다고 착각하기 쉽습니다.',
+ brk:'명백히 부당한 명령을 받았을 때. 여기서 절차를 택하면 질서 중립으로, 사람을 택하면 중립 선으로 기웁니다.',
+ ally:'중립 선 · 질서 중립. 목적을 공유하거나 방법을 공유합니다.',
+ friction:'혼돈 중립 · 혼돈 악. 약속이 성립하지 않는 상대를 가장 다루기 어려워합니다.',
+ cls:'팔라딘, 클레릭',
+ people:[['이순신','역사','파직과 투옥을 겪고도 직분과 군율을 그대로 지켰다. 제도가 자신을 배신했을 때도 제도를 버리지 않은 쪽.'],['세종','역사','백성을 위한 개혁을 제도의 방식으로 밀었다. 공법 시행 전 17만 명에게 찬반을 물은 여론조사가 대표적이다.'],['마르쿠스 아우렐리우스','역사','최고 권력자이면서 스스로에게 가장 엄격한 규범을 적용했다. 권한을 의무의 다른 이름으로 이해한 사례.'],['토머스 모어','역사','왕의 요구를 법 해석과 양심으로 거부하다 처형됐다. 침묵으로 버틴 마지막까지 절차 안에 있었다.'],['조지 워싱턴','역사','더 할 수 있는 자리에서 스스로 물러나 임기 제한의 선례를 만들었다. 권력을 규칙으로 되돌린 쪽.'],['아서 왕과 원탁의 기사','허구','개인의 무력을 서약에 묶어두는 구조 자체가 이 성향의 정의에 가깝다.'],['관우 (『삼국지연의』)','허구','조조에게 받은 은혜를 갚은 뒤에야 떠났다. 명분과 의리의 순서를 어기지 않은 인물.'],['이몽룡 (『춘향전』)','허구','사적인 원한을 사적으로 갚지 않고 암행어사라는 공적 절차로 처리한다.']]},
+
+NG:{name:'중립 선',en:'Neutral Good',epithet:'조력자',
+ line:'선한 결과가 목적이고, 규칙은 거기에 쓰이는 도구입니다. 법이든 반칙이든 사람이 덜 다치는 쪽을 고릅니다.',
+ principles:['제도가 도움이 되면 쓰고, 방해가 되면 우회한다.','도움이 필요한 사람이 누구인지부터 본다.','명분보다 실제로 나아진 상황을 셈한다.'],
+ strength:'유연한 선의. 아홉 칸 중 가장 많은 성향과 협력할 수 있고, 극단으로 치우친 진영 사이에서 다리 역할을 합니다.',
+ shadow:'기준이 상황마다 달라 보여 신뢰를 쌓는 데 시간이 걸립니다. 좋은 의도가 남의 자율을 대신 결정해버리는 참견이 되기도 합니다.',
+ brk:'모두를 도울 수 없을 때. 누구를 포기할지 정하는 순간 스스로를 가장 오래 괴롭힙니다.',
+ ally:'질서 선 · 혼돈 선. 방법은 달라도 같은 방향을 봅니다.',
+ friction:'중립 악. 계산 구조가 같고 부호만 반대라 가장 정면으로 충돌합니다.',
+ cls:'클레릭, 드루이드, 바드',
+ people:[['앙리 뒤낭','역사','솔페리노 전장에서 적군과 아군을 가리지 않고 부상병을 돌본 경험에서 적십자를 만들었다.'],['플로렌스 나이팅게일','역사','통계와 행정을 무기로 군 의료를 뜯어고쳤다. 제도를 숭배하지도 부수지도 않고 도구로 쓴 쪽.'],['오스카 쉰들러','역사','나치 당원이자 사업가로서 뇌물과 장부 조작을 동원해 1,100여 명을 살렸다.'],['유일한','역사','기업을 일으킨 뒤 지분 대부분을 사회에 넘겼다. 축적의 목적을 바깥에 둔 사례.'],['장기려','역사','가난한 환자를 돌려보내지 않으려 진료비를 대신 냈고, 뒤에는 아예 의료보험 조합을 만들었다.'],['미리엘 주교 (『레 미제라블』)','허구','장발장의 절도를 덮어주며 법이 아니라 사람을 먼저 구했다.'],['심청 (『심청전』)','허구','규범이나 명분이 아니라 한 사람을 위해 자기 목숨을 계산에서 뺐다.'],['전장의 의무병','허구','어느 편인지보다 누가 다쳤는지를 먼저 보는 자리. 이 성향의 가장 단순한 형태.']]},
+
+CG:{name:'혼돈 선',en:'Chaotic Good',epithet:'반항아',
+ line:'양심이 법 위에 있습니다. 규칙이 사람을 해치면 규칙 쪽이 틀렸다고 봅니다.',
+ principles:['옳다고 판단하면 허가를 기다리지 않는다.','권위는 실적으로 증명해야 인정받는다.','약자 편에 서는 데 절차를 요구하지 않는다.'],
+ strength:'제도가 마비된 순간에 가장 먼저 움직입니다. 관성에 눌린 조직이 놓친 문제를 드러내는 역할을 합니다.',
+ shadow:'내 양심이 틀렸을 가능성을 검증할 장치가 스스로에게 없습니다. 정당한 저항과 단순한 규칙 회피를 구분하기 어려워집니다.',
+ brk:'자기가 만든 조직이 커져서 규칙이 필요해질 때. 이 지점에서 질서 선으로 옮겨가는 경우가 많습니다.',
+ ally:'중립 선 · 혼돈 중립.',
+ friction:'질서 중립 · 질서 악. 절차 자체를 무기로 쓰는 상대를 가장 못 견딥니다.',
+ cls:'로그, 바드, 레인저',
+ people:[['해리엇 터브먼','역사','도망노예법이 시퍼렇게 살아 있던 시기에 그 법을 정면으로 어기며 수십 명을 북부로 빼돌렸다.'],['안중근','역사','통치 질서 바깥에서 행동했지만 스스로를 범죄자가 아닌 군인으로 규정하며 재판에 임했다.'],['전봉준','역사','절차가 막히자 절차 밖으로 나가 봉기를 조직하고 폐정 개혁을 요구했다.'],['마하트마 간디','역사','법을 몰래 어기는 대신 공개적으로 어기고 처벌을 받았다. 질서 선과의 경계에 걸친 사례.'],['임꺽정','역사','조선 중기의 도적. 수탈 구조에 대한 저항으로 읽히기도 하지만 기록이 관 쪽에 치우쳐 있다.'],['로빈 후드','허구','법을 어기면서 정의를 주장하는 가장 오래된 원형.'],['홍길동 (『홍길동전』)','허구','신분 질서를 인정하지 않고 아예 바깥에 새 나라를 세운다.'],['장발장 (『레 미제라블』)','허구','전과와 가명을 안고도 남을 구하는 쪽을 반복해서 택한다.']]},
+
+LN:{name:'질서 중립',en:'Lawful Neutral',epithet:'심판자',
+ line:'일관성 자체가 가치입니다. 결과가 누구에게 유리한지보다, 같은 기준이 모두에게 똑같이 적용됐는지를 봅니다.',
+ principles:['정해진 절차대로 처리한다. 예외는 절차로 만든다.','감정과 인정에 따라 기준을 흔들지 않는다.','권한 밖의 일은 하지 않고, 권한 안의 일은 반드시 한다.'],
+ strength:'신뢰의 인프라. 이 성향이 없으면 계약도 재판도 회계도 성립하지 않습니다. 압력 아래에서 기준을 지키는 힘이 있습니다.',
+ shadow:'규칙이 잘못 설계됐을 때 그 잘못을 성실하게 집행합니다. 사람보다 체계를 먼저 구하는 선택을 하게 됩니다.',
+ brk:'법과 정의가 갈라진 사건을 만났을 때. 이 균열을 견디지 못하면 질서 선이나 질서 악 어느 쪽으로든 미끄러집니다.',
+ ally:'질서 선 · 질서 악. 선악이 달라도 절차 언어가 통합니다.',
+ friction:'혼돈 계열 전부.',
+ cls:'몽크, 위저드, 파이터',
+ people:[['상앙 (商鞅)','역사','신분을 가리지 않는 법 집행으로 진(秦)을 재편했고, 끝내 자신이 만든 법에 걸려 죽었다.'],['한비자','역사','통치자의 선의가 아니라 법과 제도의 작동을 신뢰해야 한다고 주장했다.'],['유스티니아누스 1세','역사','흩어진 로마법을 집대성해 이후 천 년의 법 체계를 남겼다. 체계를 만드는 일 자체가 업적인 쪽.'],['정도전','역사','새 왕조를 사람이 아니라 법전과 관제 위에 세우려 했다.'],['오토 폰 비스마르크','역사','이념보다 체제의 유지와 세력 균형을 상수로 두고 움직였다.'],['자베르 (『레 미제라블』)','허구','법을 세계의 뼈대로 삼았고, 그 뼈대가 흔들리자 자신이 무너졌다.'],['제갈량 (『삼국지연의』)','허구','아끼던 마속을 군율대로 벤 읍참마속이 이 성향의 핵심 장면이다.'],['라다만티스 (그리스 신화)','허구','저승의 재판관. 죽은 자를 감정 없이 같은 기준으로 판별한다.']]},
+
+TN:{name:'진정 중립',en:'True Neutral',epithet:'균형자',
+ line:'어느 축에도 크게 기울지 않습니다. 극단이 부딪히는 자리에서 판을 전체로 보는 위치입니다.',
+ principles:['하나의 원리가 모든 상황을 설명한다고 믿지 않는다.','과열된 쪽에서 한 걸음 물러나 사실을 먼저 확인한다.','내 삶의 균형을 깨면서까지 진영에 헌신하지 않는다.'],
+ strength:'상황을 편들지 않고 읽습니다. 이해가 갈린 자리에서 중재자로 받아들여질 수 있는 몇 안 되는 위치입니다.',
+ shadow:'균형과 방관은 겉모습이 같습니다. 아무 입장도 갖지 않는 편이 편해서 중립을 택한 것이라면, 판단을 미루는 습관이 됩니다.',
+ brk:'중립이 사실상 강자 편이 되는 상황. 여기서 움직이면 선 쪽으로, 계속 서 있으면 악 쪽으로 읽히기 시작합니다.',
+ ally:'거의 모두. 대신 어느 쪽에서도 완전한 아군으로는 세지 않습니다.',
+ friction:'헌신을 요구하는 극단 성향.',
+ cls:'드루이드, 위저드',
+ people:[['에라스뮈스','역사','종교개혁이 유럽을 둘로 가를 때 양쪽의 요구를 모두 거절했고, 양쪽에서 배신자로 불렸다.'],['몽테뉴','역사','판단을 서두르지 않는 태도 자체를 방법으로 삼았다. 중립이 무관심이 아니라 훈련일 수 있음을 보여준 쪽.'],['피론','역사','회의주의의 시조. 어느 주장에도 최종적으로 동의하지 않는 상태를 목표로 삼았다.'],['장자','역사','옳고 그름의 구분 자체를 인위적인 것으로 보았다.'],['최명길','역사','명분이 지배하던 조정에서 화친을 주장해 나라를 존속시켰고, 그 대가로 오래 비난받았다.'],['헤스티아 (그리스 신화)','허구','화로의 여신. 올림포스의 분쟁과 권력 다툼에 끝내 끼어들지 않는다.'],['사마휘 (『삼국지연의』)','허구','인재를 알아보고 길을 알려주되 어느 진영에도 자기를 걸지 않는다.'],['순환을 지키는 드루이드','허구','어느 쪽도 완전히 이기지 않게 하는 역할. 균형이 목적인 자리.']]},
+
+CN:{name:'혼돈 중립',en:'Chaotic Neutral',epithet:'자유인',
+ line:'내 자유가 첫 번째 기준입니다. 남을 해치려는 것도 구하려는 것도 아니고, 묶이지 않으려는 것입니다.',
+ principles:['누구의 허가도 필요 없는 삶을 유지한다.','계획보다 지금의 판단을 신뢰한다.','장기 계약과 소속에 무게를 두지 않는다.'],
+ strength:'아무도 상상하지 않은 선택지를 꺼냅니다. 규칙에 갇힌 국면을 물리적으로 흔들어 여는 역할을 합니다.',
+ shadow:'신뢰가 쌓이지 않습니다. 함께 계획을 세운 사람들이 반복해서 대가를 치르고, 자유가 결국 고립으로 돌아옵니다.',
+ brk:'지키고 싶은 사람이 생겼을 때. 이 지점에서 대부분 혼돈 선 쪽으로 이동합니다.',
+ ally:'혼돈 선 · 진정 중립.',
+ friction:'질서 계열 전부. 특히 위계 조직 안에서는 오래 버티지 못합니다.',
+ cls:'바바리안, 로그, 소서러',
+ people:[['디오게네스','역사','통 속에 살며 권력자에게 비켜달라고 요구했다. 지위와 소속을 자발적으로 버린 극단적 사례.'],['김삿갓 (김병연)','역사','과거와 가문과 정착을 모두 놓고 평생을 떠돌았다.'],['이백','역사','관직에 매이기를 거부하고 술과 유랑 쪽을 택했다.'],['프랑수아 비용','역사','중세의 시인이자 상습 범죄자. 추방과 사면을 오가며 어디에도 정착하지 않았다.'],['카사노바','역사','도시와 신분과 직업을 계속 갈아치우며 살았다. 목표가 아니라 이동 자체가 삶의 형태였던 쪽.'],['오디세우스 (『오디세이아』)','허구','규범보다 기지와 그때그때의 판단으로 움직인다.'],['손오공 (『서유기』)','허구','천상의 위계를 통째로 뒤집어엎고, 끝내 굴레를 씌워야 다스려진다.'],['허클베리 핀','허구','문명과 규범 자체가 답답해서 계속 강 아래로 도망친다.']]},
+
+LE:{name:'질서 악',en:'Lawful Evil',epithet:'지배자',
+ line:'규칙을 존중하는 게 아니라 활용합니다. 질서는 목적을 이루는 가장 효율적인 도구라고 봅니다.',
+ principles:['합법의 테두리 안에서 최대한을 가져간다.','계약은 지킨다. 대신 계약을 내게 유리하게 설계한다.','위계는 유지한다. 내가 위에 있는 한.'],
+ strength:'약속을 지킵니다. 아홉 칸 중 가장 협상 가능한 악이고, 그래서 가장 오래 살아남습니다.',
+ shadow:'제도를 정교하게 쓸수록 피해가 조용해집니다. 자기 손에 피를 묻히지 않고도 큰 손해를 남에게 넘길 수 있습니다.',
+ brk:'자기가 쓰던 규칙이 자기를 겨눌 때. 여기서 규칙을 버리면 중립 악으로 떨어집니다.',
+ ally:'질서 중립. 절차를 공유하는 한 오래 협력합니다.',
+ friction:'혼돈 선. 이 조합이 이야기에서 가장 자주 부딪힙니다.',
+ cls:'클레릭, 파이터, 워락',
+ people:[['아돌프 아이히만','역사','서류와 명령 계통을 따라 대량학살의 수송을 관리했고, 재판에서 절차를 이행했을 뿐이라고 주장했다.'],['이완용','역사','폭력이 아니라 조약과 관직, 합법적 절차를 통해 국권 이양을 완성했다.'],['토마스 데 토르케마다','역사','종교재판을 정교한 심문 규정과 문서 체계 위에 올려놓았다. 잔혹함이 서식으로 관리된 사례.'],['레오폴 2세','역사','콩고자유국을 개인 소유로 삼아 법적 형식을 갖춘 채 착취를 운영했다.'],['로베스피에르','역사','공포정치를 혁명 법정의 이름으로 집행했다. 다만 그를 어느 칸에 둘지는 평가가 갈린다.'],['이아고 (『오셀로』)','허구','규범과 신뢰 구조를 부수지 않고 그대로 이용해 사람을 무너뜨린다.'],['메피스토펠레스 (『파우스트』)','허구','계약을 정확히 지키면서 상대를 파멸로 데려간다.'],['조조 (『삼국지연의』)','허구','법과 제도를 세우되 그 목적이 자기 패권에 있는 인물로 그려진다.']]},
+
+NE:{name:'중립 악',en:'Neutral Evil',epithet:'실리주의자',
+ line:'이익만이 기준입니다. 규칙을 따르는 것도 어기는 것도 그때의 손익 계산에 달려 있습니다.',
+ principles:['비용이 낮은 쪽을 고른다. 그 비용을 누가 치르는지는 부차적이다.','충성은 유효한 동안만 유지한다.','도덕적 명분은 필요할 때 꺼내 쓴다.'],
+ strength:'군더더기가 없습니다. 감정이나 체면 때문에 손해 보는 선택을 하지 않고, 상황 변화에 가장 빠르게 적응합니다.',
+ shadow:'같은 계산을 상대도 한다는 사실을 잊습니다. 아무도 이 사람을 위해 위험을 감수하지 않게 되어, 위기에서 혼자 남습니다.',
+ brk:'배신의 이득이 손실보다 커지는 순간. 그 계산이 드러나면 관계는 한 번에 끝납니다.',
+ ally:'없음에 가깝습니다. 이해가 겹치는 동안만 동맹입니다.',
+ friction:'중립 선. 같은 상황을 정확히 반대로 계산합니다.',
+ cls:'로그, 위저드, 어쌔신',
+ people:[['탈레랑','역사','왕정·혁명정부·나폴레옹·왕정복고를 차례로 섬기며 매번 다음 승자 쪽으로 옮겨갔다.'],['알키비아데스','역사','아테네에서 스파르타로, 다시 페르시아로. 이익이 있는 쪽이 곧 조국이었다.'],['베네딕트 아널드','역사','전공을 세운 장군이었지만 대가를 약속받고 요새를 넘기려 했다.'],['바실 자하로프','역사','같은 무기를 대립하는 양쪽에 함께 팔아 죽음의 상인으로 불렸다.'],['알렉산데르 6세','역사','교황직을 가문의 사업 기반으로 운용했다. 규범을 지키지도 부수지도 않고 그때그때 값을 매긴 쪽.'],['클로디어스 (『햄릿』)','허구','형을 죽이고 왕관과 왕비를 함께 가져간다. 광기가 아니라 계산이다.'],['여포 (『삼국지연의』)','허구','이익을 따라 주군을 거듭 갈아치웠고, 그래서 아무도 그를 위해 나서지 않았다.'],['전쟁으로 이익을 얻는 상인','허구','승패보다 정산에 관심이 있는 자리.']]},
+
+CE:{name:'혼돈 악',en:'Chaotic Evil',epithet:'파괴자',
+ line:'제약도 배려도 남기지 않습니다. 아홉 칸 중 이야기 안에서 가장 다루기 어려운 자리입니다.',
+ principles:['원하는 것을 지금 가진다.','약속은 편의일 뿐 구속이 아니다.','힘이 정당성을 대신한다.'],
+ strength:'억제기가 없습니다. 다른 성향이 멈추는 지점에서 멈추지 않기 때문에, 단기적으로는 예측 불가능한 위협이 됩니다.',
+ shadow:'질서 악과 달리 축적이 되지 않습니다. 신뢰도 조직도 남지 않아 대부분 스스로 무너집니다.',
+ brk:'혼자 남았을 때. 협력이 필요해지는 순간 이 성향은 유지되지 못합니다.',
+ ally:'없습니다. 공포로 유지되는 관계뿐입니다.',
+ friction:'전부. 특히 질서 계열은 이 성향을 제거 대상으로 다룹니다.',
+ cls:'바바리안, 워락, 소서러',
+ people:[['칼리굴라','역사','권력에 어떤 제약도 두지 않았다고 전한다. 다만 사료 대부분이 그를 적대한 원로원 쪽에서 나왔다.'],['궁예','역사','스스로 미륵을 자처하며 측근과 가족까지 숙청했다고 전한다. 이 기록 역시 그를 무너뜨린 고려 측 정리다.'],['이반 4세','역사','친위 조직을 풀어 도시 하나를 통째로 학살했고, 끝내 자기 아들까지 죽였다.'],['티무르','역사','저항한 도시를 몰살하고 해골로 탑을 쌓아 공포 자체를 통치 수단으로 삼았다.'],['질 드 레','역사','전쟁 영웅에서 연쇄살인범으로 기록됐다. 다만 재판이 재산 몰수를 노린 것이라는 반론이 있다.'],['맥베스 후반 (『맥베스』)','허구','억제를 잃은 뒤에는 목적도 남지 않고 파괴만 남는다.'],['사탄 (『실낙원』)','허구','무엇을 얻기 위해서가 아니라 질서를 부수기 위해 움직인다.'],['에리스 (그리스 신화)','허구','불화의 여신. 사과 하나를 던져 전쟁을 일으키는 것으로 충분하다.']]}
+};
+
+/* 문항: axis 'L' = 질서(+)/혼돈(-), 'G' = 선(+)/악(-) */
+const Q = [
+/* ---- 질서(+) / 혼돈(-) : 10문항 ---- */
+{a:'L',t:'새벽 3시, 차 한 대 없는 교차로. 보행 신호는 빨간불이다.',o:[
+ ['신호가 바뀔 때까지 기다린다',2],['좌우를 확인하고, 안전하면 건넌다',0],['규칙은 상황에 맞을 때만 의미가 있다. 건넌다',-2]]},
+{a:'L',t:'친한 사람과 동업을 시작한다. 계약서 얘기를 꺼내면 분위기가 어색해질 것 같다.',o:[
+ ['관계와 별개로 조건을 꼼꼼히 문서로 만든다',2],['핵심 조항만 간단히 남겨둔다',0],['문서보다 사람을 믿는다. 문제가 생기면 그때 얘기한다',-2]]},
+{a:'L',t:'새 업무가 떨어졌다. 첫 30분에 무엇을 하는가.',o:[
+ ['기준과 절차부터 정리한다',2],['큰 방향만 잡고 세부는 하면서 다듬는다',0],['일단 손을 대본다. 구조는 하다 보면 생긴다',-2]]},
+{a:'L',t:'오래된 사내 규정이 명백히 비효율적이다.',o:[
+ ['지킬 것은 지키면서 정식으로 개정을 제안한다',2],['핵심 조항만 지키고 나머지는 융통성 있게 처리한다',0],['더 나은 방식으로 처리하고 결과로 설명한다',-2]]},
+{a:'L',t:'새로 온 상사가 내 방식과 다른 지시를 내렸다. 틀리진 않았지만 비효율적이다.',o:[
+ ['지시대로 한다. 판단은 그 자리의 몫이다',2],['일단 따르되 근거를 물어본다',0],['내 방식대로 하고 결과로 설명한다',-2]]},
+{a:'L',t:'팀 의견이 정확히 반으로 갈렸다.',o:[
+ ['정해진 의사결정 규칙대로 처리한다',2],['시간을 더 써서 합의를 만든다',0],['가장 확신 있는 사람이 밀고 나가야 한다',-2]]},
+{a:'L',t:'규정상 안 되는 일인데, 담당자가 융통성을 발휘하면 가능하다.',o:[
+ ['규정대로 처리해달라고 한다',2],['사정을 설명하고 판단을 맡긴다',0],['되는 쪽으로 부탁한다. 규정은 이런 경우까지 못 본다',-2]]},
+{a:'L',t:'여행 첫날 아침, 내 상태는.',o:[
+ ['시간대별 일정표가 이미 정리돼 있다',2],['갈 곳 몇 개만 정해두고 나머지는 그날 정한다',0],['숙소를 나서면서 정한다',-2]]},
+{a:'L',t:'오래된 관습에 대해.',o:[
+ ['오래 살아남은 데는 이유가 있다',2],['쓸모 있는 것만 골라 쓴다',0],['낡은 것이 깨져야 새것이 온다',-2]]},
+{a:'L',t:'무엇을 더 신뢰하는가.',o:[
+ ['검증된 제도와 문서로 남은 약속',2],['사람과 상황에 따라 다르다',0],['각자의 양심과 그때의 판단',-2]]},
+
+/* ---- 선(+) / 악(-) : 10문항 ---- */
+{a:'G',t:'출장지에서 지갑을 주웠다. 주인에게 직접 돌려주려면 반나절이 날아간다.',o:[
+ ['반나절을 쓴다',2],['우체통이나 지구대에 넣고 잊는다',0],['그대로 둔다. 내가 감당할 일이 아니다',-2]]},
+{a:'G',t:'옆 팀 동료가 큰 실수를 했다. 아직 아무도 모른다.',o:[
+ ['내 시간을 들여 알려주고 수습을 돕는다',2],['내 일이 아니다. 지켜본다',0],['드러날 때까지 둔다. 내 평가에 나쁠 것이 없다',-2]]},
+{a:'G',t:'나에게 큰 손해를 입힌 사람이 곤경에 빠졌다.',o:[
+ ['사정을 듣고, 도울 수 있으면 돕는다',2],['관여하지 않는다',0],['도울 이유가 없다. 자업자득이다',-2]]},
+{a:'G',t:'아무도 모르게, 남에게 작은 피해를 주면서 큰 이익을 얻을 수 있다.',o:[
+ ['하지 않는다. 아는 사람이 나 하나뿐이어도',2],['피해가 얼마나 작은지에 달렸다',0],['들키지 않는다면 한다',-2]]},
+{a:'G',t:'회사의 오랜 관행이 바깥에 피해를 준다. 문제를 제기하면 내가 불이익을 받는다.',o:[
+ ['불이익을 감수하고 제기한다',2],['내부에서 조용히 피해를 줄여본다',0],['관행은 관행이다. 내 일에 집중한다',-2]]},
+{a:'G',t:'한정된 자원을 나눠야 한다.',o:[
+ ['가장 어려운 쪽부터 준다',2],['기여한 만큼 나눈다',0],['내 몫과 내 사람 몫을 먼저 확보한다',-2]]},
+{a:'G',t:'권한이 생긴다면 가장 먼저 하고 싶은 일은.',o:[
+ ['밀려나 있던 사람들의 상황을 고친다',2],['내 자리와 생활을 안정시킨다',0],['내 뜻이 통하는 범위를 넓힌다',-2]]},
+{a:'G',t:'경쟁에서 이겼는데, 상대가 완전히 무너졌다.',o:[
+ ['후유증을 줄일 방법을 찾아본다',2],['경기의 결과일 뿐이다',0],['다시 올라오지 못하는 편이 내게 낫다',-2]]},
+{a:'G',t:'기부에 쓸 여유가 생겼다.',o:[
+ ['내가 평생 만날 일 없는 사람에게 가는 곳에 낸다',2],['내가 아는 단체나 주변의 어려움에 쓴다',0],['내 노후에 넣는다',-2]]},
+{a:'G',t:'낯선 사람이 도움을 청한다. 도우면 오늘 하루가 통째로 날아간다.',o:[
+ ['하루를 쓴다',2],['내 손해가 크지 않은 선까지만 돕는다',0],['지나간다. 각자 자기 몫이 있다',-2]]}
+];
+
+const MAX = 20;
+/* 사회적 바람직성 보정.
+   원점수는 선/질서 쪽으로 쏠리므로 문턱을 그쪽으로 밀어 올린다.
+   즉 여기서 '악'은 절대적 악이 아니라 '같은 문항을 푼 사람들 중 자기 이익을 더 자주 택한 쪽'을 뜻한다.
+   보정 강도를 바꾸려면 이 두 값만 고치면 된다.
+     절대기준(보정 없음)  L:{hi:6,lo:-6}   G:{hi:6,lo:-6}
+     약한 보정            L:{hi:8,lo:-4}   G:{hi:10,lo:0}
+     중간 보정 ← 현재값   L:{hi:8,lo:-4}   G:{hi:12,lo:2}
+     강한 보정            L:{hi:10,lo:-2}  G:{hi:14,lo:6}   */
+const CUT = { L:{hi: 8, lo:-4}, G:{hi:12, lo: 2} };
+
+/* ================= 판 그리기 ================= */
+function buildPlate(el,small){
+  el.innerHTML='';
+  CELLS.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='cell';d.dataset.k=c.k;d.dataset.col=i%3;d.dataset.row=Math.floor(i/3);
+    d.innerHTML='<span class="code">'+c.k+'</span>'+(small?'':'<span class="ko">'+c.ko+'</span>');
+    el.appendChild(d);
+  });
+  const m=document.createElement('div');m.className='marker';el.appendChild(m);
+  return m;
+}
+const heroMarker=buildPlate(document.getElementById('heroPlate'),false);
+heroMarker.classList.add('idle');
+const liveMarker=buildPlate(document.getElementById('livePlate'),true);
+const resMarker=buildPlate(document.getElementById('resPlate'),false);
+
+function band(v,ax){ const c=CUT[ax]; return v>=c.hi?0 : v<=c.lo?2 : 1; }
+function keyOf(l,g){ return CELLS[band(g,'G')*3+band(l,'L')].k; }
+/* 문턱이 비대칭이므로, 마커의 시각적 위치도 구간별로 매핑해 항상 켜진 칸 안에 들어오게 한다 */
+function frac(v,ax){
+  const c=CUT[ax], T=1/3;
+  v=Math.max(-MAX,Math.min(MAX,v));
+  if(v>=c.hi) return (MAX-v)/Math.max(1,MAX-c.hi)*T;
+  if(v> c.lo) return T + (c.hi-v)/Math.max(1,c.hi-c.lo)*T*0.98;
+  return 2*T + T*0.02 + (c.lo-v)/Math.max(1,c.lo+MAX)*T*0.98;
+}
+function place(plate,marker,l,g){
+  marker.style.left=(5+frac(l,'L')*90)+'%';
+  marker.style.top =(5+frac(g,'G')*90)+'%';
+  const k=keyOf(l,g);
+  plate.querySelectorAll('.cell').forEach(c=>c.classList.toggle('lit',c.dataset.k===k));
+  return k;
+}
+
+/* ================= 진행 ================= */
+let idx=0, ans=[], L=0, G=0, order=[];
+const $=id=>document.getElementById(id);
+
+/* 선택지가 항상 +2 → 0 → -2 순으로 나오면 위치만 보고 답을 고른다.
+   문항별로 한 번만 섞고 그 순서를 고정해, 뒤로 갔다 와도 같은 배열을 본다. */
+function shuffled(n){ const a=[...Array(n).keys()]; for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function orderFor(i){ if(!order[i]) order[i]=shuffled(Q[i].o.length); return order[i]; }
+
+function show(id){ ['test','result'].forEach(s=>$(s).classList.toggle('hidden',s!==id)); }
+function histHTML(a){ return a.people.map(p=>'<li><span><b>'+p[0]+'</b><span class="tag">'+p[1]+'</span></span><span class="d">'+p[2]+'</span></li>').join(''); }
+
+function tally(){
+  L=0;G=0;
+  ans.forEach((v,i)=>{ if(v===undefined)return; (Q[i].a==='L') ? L+=v : G+=v; });
+}
+
+function render(){
+  const q=Q[idx], N=Q.length;
+  $('qCount').textContent='문항 '+String(idx+1).padStart(2,'0')+' / '+N;
+  $('qAxis').textContent='';
+  $('qBar').style.width=(idx/N*100)+'%';
+  $('qText').textContent=q.t;
+  $('qOpts').innerHTML='';
+  orderFor(idx).forEach((oi,pos)=>{
+    const o=q.o[oi];
+    const b=document.createElement('button');
+    b.className='opt'+(ans[idx]===o[1]?' picked':'');b.type='button';
+    b.innerHTML='<span class="pip">'+'ⅠⅡⅢ'[pos]+'</span><span>'+o[0]+'</span>';
+    b.onclick=()=>choose(o[1]);
+    $('qOpts').appendChild(b);
+  });
+  $('back').classList.toggle('hidden',idx===0);
+  liveMarker.classList.toggle('idle',ans.filter(v=>v!==undefined).length===0);
+  tally();
+  const k=place($('livePlate'),liveMarker,L,G);
+  $('liveCoord').textContent='L/C '+(L>0?'+':'')+L+' · G/E '+(G>0?'+':'')+G;
+  $('liveCell').textContent=ans.filter(v=>v!==undefined).length===0?'아직 판 한가운데':A[k].name+' 부근';
+}
+
+function choose(v){
+  ans[idx]=v;
+  if(idx<Q.length-1){ idx++; render(); }
+  else { tally(); finish(L,G,true); }
+}
+
+/* 평균만 보면 '+2와 -2를 오간 사람'과 '계속 0을 고른 사람'이 같은 좌표에 찍힌다.
+   두 경우를 갈라 읽기 위해 축별 응답 분포를 따로 본다. */
+function profile(ax){
+  let p=0,z=0,n=0;
+  ans.forEach((v,i)=>{ if(v===undefined||Q[i].a!==ax)return; v>0?p++:v<0?n++:z++; });
+  if(Math.min(p,n)>=3) return ['갈림','같은 축에서 양쪽 끝을 여러 번 오갔습니다. 상황이 판단을 크게 바꾸는 편입니다.'];
+  if(z>=5) return ['중간','대부분 가운데를 골랐습니다. 어느 쪽으로도 강하게 기울지 않습니다.'];
+  return ['일관','거의 한쪽으로 답했습니다. 상황이 바뀌어도 기준이 잘 안 흔들립니다.'];
+}
+function runnerUp(l,g){
+  const cur=keyOf(l,g); let best=null,bd=1e9;
+  [[4,0],[-4,0],[0,4],[0,-4]].forEach(d=>{
+    const k=keyOf(l+d[0],g+d[1]); if(k===cur)return;
+    const dist=Math.abs(d[0])+Math.abs(d[1]); if(dist<bd){bd=dist;best=k;}
+  });
+  return best;
+}
+
+function finish(l,g,pushUrl){
+  const k=keyOf(l,g), a=A[k];
+  $('rCode').textContent=a.en.toUpperCase()+'  ·  L/C '+(l>0?'+':'')+l+'  G/E '+(g>0?'+':'')+g;
+  $('rName').textContent=a.name;
+  $('rEpithet').textContent=a.epithet;
+  $('rLine').textContent=a.line;
+  $('rPrinciples').innerHTML=a.principles.map(p=>'<li>'+p+'</li>').join('');
+  $('rStrength').textContent=a.strength;
+  $('rShadow').textContent=a.shadow;
+  $('rBreak').textContent=a.brk;
+  $('rAlly').textContent=a.ally;
+  $('rFriction').textContent=a.friction;
+  $('rClass').textContent=a.cls;
+  $('rPeople').innerHTML=histHTML(a);
+  $('rLScore').textContent=(l>0?'+':'')+l;
+  $('rGScore').textContent=(g>0?'+':'')+g;
+  $('rLBar').style.left='calc('+(50-(l/MAX)*48)+'% - 1px)';
+  $('rGBar').style.left='calc('+(50-(g/MAX)*48)+'% - 1px)';
+  const pl=profile('L'), pg=profile('G'), ru=runnerUp(l,g);
+  let txt='답한 방식 — 질서/혼돈 축은 '+pl[0]+', 선/악 축은 '+pg[0]+'. '+
+          (pl[0]==='갈림'?pl[1]:pg[0]==='갈림'?pg[1]:pl[0]==='중간'&&pg[0]==='중간'?'양쪽 축 모두 가운데에 머물렀습니다.':pl[1]);
+  if(ru) txt+=' 한 칸 옆은 '+A[ru].name+'입니다.';
+  $('rEdge').textContent=txt;
+  place($('resPlate'),resMarker,l,g);
+  show('result');
+  if(pushUrl){
+    const u=new URL(location.href);
+    u.searchParams.set('l',l);u.searchParams.set('g',g);
+    history.replaceState(null,'',u);
+  }
+  $('result').scrollIntoView({block:'start'});
+}
+
+function reset(){
+  idx=0;ans=[];L=0;G=0;order=[];
+  const u=new URL(location.href);u.search='';history.replaceState(null,'',u);
+  show('test');render();
+  $('test').scrollIntoView({block:'start'});
+}
+
+$('start').onclick=()=>{ show('test');render();$('test').scrollIntoView({block:'start'}); };
+$('restart1').onclick=reset;
+$('restart2').onclick=reset;
+$('back').onclick=()=>{ if(idx>0){idx--;render();} };
+
+/* ================= 공유 ================= */
+function toast(msg,el){ const t=$(el||'toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800); }
+function copy(text,msg,el){
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>toast(msg,el)).catch(()=>fallback(text,msg,el));
+  } else fallback(text,msg,el);
+}
+function fallback(text,msg,el){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast(msg,el);}catch(e){toast('복사 실패 — 직접 선택해 주세요',el);}
+  document.body.removeChild(ta);
+}
+$('copyLink').onclick=()=>{
+  const u=new URL(location.href);u.searchParams.delete('p');
+  copy(u.toString(),'링크 복사됨');
+};
+$('toPair').onclick=()=>{
+  $('selA').value=keyOf(L,G);renderPair(true);
+  $('pair').scrollIntoView({block:'start'});
+};
+$('copyText').onclick=()=>{
+  const k=keyOf(L,G),a=A[k];
+  copy('나의 성향: '+a.name+' ('+a.en+') — '+a.epithet+'\n좌표 L/C '+(L>0?'+':'')+L+' · G/E '+(G>0?'+':'')+G+'\n'+a.line+'\n'+location.href,'요약 복사됨');
+};
+
+/* ================= 도감 ================= */
+const grid=$('codexGrid');
+let openKey=null;
+CELLS.forEach((c,i)=>{
+  const a=A[c.k];
+  const b=document.createElement('button');
+  b.className='cx';b.type='button';b.setAttribute('aria-expanded','false');b.dataset.k=c.k;
+  b.innerHTML='<span class="c">'+c.k+' · '+a.en.toUpperCase()+'</span><span class="n">'+a.name+' — '+a.epithet+'</span><span class="e">'+a.line.split('.')[0]+'.</span>';
+  b.onclick=()=>toggle(c.k,i);
+  grid.appendChild(b);
+  if(i%3===2){ const d=document.createElement('div');d.className='cx-detail';d.dataset.row=Math.floor(i/3);grid.appendChild(d); }
+});
+function toggle(k,i){
+  const row=Math.floor(i/3);
+  const panel=grid.querySelector('.cx-detail[data-row="'+row+'"]');
+  grid.querySelectorAll('.cx').forEach(x=>x.setAttribute('aria-expanded','false'));
+  grid.querySelectorAll('.cx-detail').forEach(p=>{ if(p!==panel)p.classList.remove('on'); });
+  if(openKey===k){ panel.classList.remove('on');openKey=null;return; }
+  const a=A[k];
+  panel.innerHTML='<div class="sub">'+k+' · '+a.en.toUpperCase()+'</div><h3>'+a.name+' — '+a.epithet+'</h3>'+
+    '<p style="margin-top:12px;color:#CFD6CC">'+a.line+'</p>'+
+    '<div class="body">'+
+      '<div><div class="block"><h4>행동 원리</h4><ul>'+a.principles.map(p=>'<li>'+p+'</li>').join('')+'</ul></div>'+
+      '<div class="block" style="margin-top:24px"><h4>강점</h4><p>'+a.strength+'</p></div>'+
+      '<div class="block" style="margin-top:24px"><h4>그늘</h4><p>'+a.shadow+'</p></div></div>'+
+      '<div><div class="block"><h4>부서지는 순간</h4><p>'+a.brk+'</p></div>'+
+      '<div class="block" style="margin-top:24px"><h4>관계</h4><div class="pairing">'+
+        '<div class="pair"><span>잘 맞음</span><p>'+a.ally+'</p></div>'+
+        '<div class="pair"><span>부딪힘</span><p>'+a.friction+'</p></div></div></div>'+
+      '<div class="block" style="margin-top:24px"><h4>어울리는 클래스</h4><p>'+a.cls+'</p></div>'+
+      '<div class="block" style="margin-top:24px"><h4>이 칸에 서 있던 사람들</h4><ul class="people">'+histHTML(a)+'</ul>'+'</div></div>'+
+    '</div>';
+  panel.classList.add('on');
+  grid.querySelector('.cx[data-k="'+k+'"]').setAttribute('aria-expanded','true');
+  openKey=k;
+}
+
+/* ================= 궁합 ================= */
+/* 45개 조합을 일일이 쓰는 대신, 두 축의 거리로 관계 유형을 정하고
+   특정 조합에는 별도 해설(PAIRNOTE)을 덧붙인다. dG = 선악 축 거리, dL = 질서혼돈 축 거리. */
+const TYPES={
+'0-0':{g:'동맹',t:'거울',
+ bond:'설명이 필요 없습니다. 상황을 보는 각도가 같아서 회의가 짧고, 한쪽이 말을 꺼내면 다른 쪽이 이미 같은 결론에 와 있습니다.',
+ fric:'같은 사각지대를 공유합니다. 둘 다 못 보는 것은 끝까지 아무도 못 봅니다.',
+ mom:'판단이 틀렸을 때. 서로가 서로를 확인해주기 때문에 브레이크 없이 더 멀리 갑니다.'},
+'0-1':{g:'동맹',t:'같은 목적, 다른 속도',
+ bond:'무엇이 옳은지에는 이견이 없습니다. 다투더라도 방향이 아니라 절차와 속도를 두고 다툽니다.',
+ fric:'한쪽은 확인하고 가자고 하고, 다른 쪽은 지금 가자고 합니다. 급할수록 이 간격이 벌어집니다.',
+ mom:'시간이 없을 때. 준비가 덜 됐다는 말과 이미 늦었다는 말이 동시에 나옵니다.'},
+'0-2':{g:'갈등하는 동맹',t:'같은 목적, 반대 방법',
+ bond:'목적지가 같아서 아무리 틀어져도 결국 다시 만납니다. 서로의 약점을 정확히 메웁니다 — 한쪽이 문을 두드리는 동안 다른 쪽이 창문을 엽니다.',
+ fric:'방법을 두고 매번 처음부터 싸웁니다. 한쪽은 상대를 무책임하다고 보고, 다른 쪽은 상대를 비겁하다고 봅니다.',
+ mom:'규칙을 어겨야 사람을 구할 수 있을 때. 이야기가 이 조합을 가장 자주 쓰는 이유입니다.'},
+'1-0':{g:'협력 가능',t:'같은 방법, 다른 무게중심',
+ bond:'일하는 방식이 같아서 실무에서는 잘 맞습니다. 합의문을 쓰면 양쪽 다 그대로 지킵니다.',
+ fric:'누구를 위해 하는 일인지가 갈립니다. 평소에는 드러나지 않다가 나눌 것이 생기면 드러납니다.',
+ mom:'남는 것을 배분할 때. 절차는 합의됐는데 몫이 합의되지 않습니다.'},
+'1-1':{g:'협력 가능',t:'비스듬히 어긋남',
+ bond:'겹치는 구간에서는 무난합니다. 서로를 극단으로 몰지 않아서 관계가 오래갑니다.',
+ fric:'두 축이 조금씩 어긋나 있어 원인을 짚기 어렵습니다. 큰 사건 없이 그냥 피곤한 관계가 되기 쉽습니다.',
+ mom:'작은 일이 반복될 때. 한 번은 넘어가고 두 번도 넘어가다가 세 번째에 터집니다.'},
+'1-2':{g:'불안정',t:'접점이 좁음',
+ bond:'이해가 겹치는 동안에는 의외로 잘 굴러갑니다. 기대가 낮아서 실망도 적습니다.',
+ fric:'방법도 다르고 목적도 조금 다릅니다. 공통의 언어를 매번 새로 만들어야 합니다.',
+ mom:'상황이 바뀔 때. 겹쳐 있던 이해가 풀리면 붙잡을 것이 남지 않습니다.'},
+'2-0':{g:'충돌',t:'같은 언어로 싸운다',
+ bond:'서로를 정확히 이해합니다. 상대의 다음 수를 읽을 수 있는 거의 유일한 관계입니다.',
+ fric:'같은 도구를 반대 목적에 씁니다. 절차와 계약과 규칙이 그대로 무기가 됩니다.',
+ mom:'협상 테이블. 둘 다 규칙을 알기 때문에 싸움이 길고 정교해집니다.'},
+'2-1':{g:'충돌',t:'어긋난 적대',
+ bond:'거의 없습니다. 잠깐 겹치는 이해관계뿐입니다.',
+ fric:'한쪽은 상대를 위험하다고 보고, 다른 쪽은 상대를 이용 가능하다고 봅니다. 이 비대칭이 관계의 전부입니다.',
+ mom:'상대가 더 이상 필요 없어지는 순간.'},
+'2-2':{g:'충돌',t:'정반대',
+ bond:'판의 대각선 양 끝입니다. 공유하는 것이 없습니다.',
+ fric:'목적도 방법도 반대입니다. 협상의 전제가 성립하지 않습니다.',
+ mom:'마주치는 순간. 이 조합은 합의가 아니라 결말로 갑니다.'}
+};
+
+const PAIRNOTE={
+'LG|CG':'파티 내분의 표준형. 둘 다 사람을 구하려 하는데, 한쪽은 허가를 기다리는 동안 다른 쪽은 이미 문을 부수고 들어갔습니다.',
+'LG|LE':'같은 제도 안에서 정반대 목적. 규칙을 지키는 쪽과 규칙을 쓰는 쪽은 겉으로 오래 구분되지 않습니다. 이야기에서 배신이 늦게 드러나는 구조가 여기서 나옵니다.',
+'LG|CE':'판의 대각선. 같은 파티에 두면 세션이 끝납니다.',
+'LG|LG':'서로를 강화합니다. 옳다고 믿는 방향으로 아무도 브레이크를 밟지 않는 것이 이 조합의 유일한 위험입니다.',
+'CG|LE':'이야기가 가장 자주 고르는 대립. 제도를 무기로 쓰는 쪽과 제도 바깥에서 저항하는 쪽입니다.',
+'CG|CN':'자유를 공유하지만 한쪽만 남을 챙깁니다. 같이 다니다가 결정적인 순간에 갈라집니다.',
+'NG|NE':'계산 구조가 같고 부호만 반대입니다. 서로의 논리를 완벽히 이해하면서 결론만 반대로 냅니다.',
+'LN|CN':'규칙 자체를 두고 부딪힙니다. 한쪽에게 절차는 세계의 뼈대이고, 다른 쪽에게는 그냥 남의 사정입니다.',
+'LN|LE':'절차 언어가 통해서 놀랍도록 오래 협력합니다. 질서 중립이 자기가 무엇에 쓰였는지 뒤늦게 아는 구조.',
+'LE|NE':'한쪽은 규칙을 만들고 한쪽은 규칙을 어깁니다. 배신이 예정된 동맹입니다.',
+'TN|CE':'중립이 가장 시험받는 조합. 물러서 있는 것이 곧 편드는 일이 되는 지점입니다.',
+'TN|TN':'편안합니다. 그리고 아무것도 결정되지 않습니다.',
+'CN|CN':'계획이 성립하지 않습니다. 둘 다 어제 한 약속을 오늘의 근거로 삼지 않습니다.',
+'CE|CE':'이 조합은 관계가 아니라 시간문제입니다.',
+'NG|CG':'방법만 다른 같은 편. 한쪽이 절차를 밟는 동안 다른 쪽이 이미 움직여서, 역할 분담이 저절로 됩니다.'
+};
+
+const IDX={};CELLS.forEach((c,i)=>IDX[c.k]=[i%3,Math.floor(i/3)]);  // [L, G]
+function pairNote(a,b){ return PAIRNOTE[a+'|'+b]||PAIRNOTE[b+'|'+a]||''; }
+
+function buildPairPlate(k1,k2){
+  const el=$('pairPlate');el.innerHTML='';
+  CELLS.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='cell';d.dataset.col=i%3;d.dataset.row=Math.floor(i/3);
+    let pin='';
+    if(c.k===k1&&c.k===k2) pin='<span class="pin both">A·B</span>';
+    else if(c.k===k1) pin='<span class="pin">A</span>';
+    else if(c.k===k2) pin='<span class="pin b">B</span>';
+    if(pin) d.classList.add('lit');
+    d.innerHTML='<span class="code">'+c.k+'</span><span class="ko">'+c.ko+'</span>'+pin;
+    el.appendChild(d);
+  });
+}
+
+function renderPair(push){
+  const k1=$('selA').value,k2=$('selB').value,a=A[k1],b=A[k2];
+  const dL=Math.abs(IDX[k1][0]-IDX[k2][0]), dG=Math.abs(IDX[k1][1]-IDX[k2][1]);
+  const T=TYPES[dG+'-'+dL], note=pairNote(k1,k2);
+  $('pairOut').innerHTML=
+    '<span class="grade" data-g="'+T.g+'">'+T.g+'</span>'+
+    '<div class="pair-title">'+T.t+'</div>'+
+    '<div class="pair-who">'+a.name+' ('+a.epithet+')  ×  '+b.name+' ('+b.epithet+')</div>'+
+    (note?'<div class="pair-note"><p>'+note+'</p></div>':'')+
+    '<div class="pair-blocks">'+
+      '<div class="block"><h4>맞물리는 곳</h4><p>'+T.bond+'</p></div>'+
+      '<div class="block"><h4>부딪히는 곳</h4><p>'+T.fric+'</p></div>'+
+      '<div class="block"><h4>터지는 순간</h4><p>'+T.mom+'</p></div>'+
+    '</div>'+
+    '<div class="brings">'+
+      '<div><h5>A가 가져오는 것</h5><p>'+a.strength+'</p></div>'+
+      '<div><h5>B가 가져오는 것</h5><p>'+b.strength+'</p></div>'+
+    '</div>';
+  buildPairPlate(k1,k2);
+  if(push){ const u=new URL(location.href);u.searchParams.set('p',k1+'-'+k2);history.replaceState(null,'',u); }
+}
+
+['selA','selB'].forEach((id,n)=>{
+  const s=$(id);
+  CELLS.forEach(c=>{ const o=document.createElement('option');o.value=c.k;o.textContent=A[c.k].name;s.appendChild(o); });
+  s.value=n===0?'LG':'CG';
+  s.onchange=()=>renderPair(true);
+});
+$('swap').onclick=()=>{ const t=$('selA').value;$('selA').value=$('selB').value;$('selB').value=t;renderPair(true); };
+$('copyPair').onclick=()=>{
+  const k1=$('selA').value,k2=$('selB').value;
+  copy(A[k1].name+' × '+A[k2].name+' — '+TYPES[Math.abs(IDX[k1][1]-IDX[k2][1])+'-'+Math.abs(IDX[k1][0]-IDX[k2][0])].t+'\n'+location.href,'복사됨','toast2');
+};
+renderPair();
+
+/* ================= 공유 링크로 들어온 경우 ================= */
+(function(){
+  const p=new URLSearchParams(location.search);
+  if(p.has('p')){
+    const [k1,k2]=p.get('p').split('-');
+    if(A[k1]&&A[k2]){ $('selA').value=k1;$('selB').value=k2;renderPair(false);
+      requestAnimationFrame(()=>$('pair').scrollIntoView({block:'start'})); }
+  }
+  if(p.has('l')&&p.has('g')){
+    const l=parseInt(p.get('l'),10),g=parseInt(p.get('g'),10);
+    if(!isNaN(l)&&!isNaN(g)){ L=Math.max(-MAX,Math.min(MAX,l));G=Math.max(-MAX,Math.min(MAX,g));finish(L,G,false); }
+  }
+})();
+</script>
+</body>
+</html>
