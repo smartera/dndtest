@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>성향 좌표 · D&amp;D 9성향 테스트</title>
-<meta name="description" content="질서-중립-혼돈 × 선-중립-악. 20개 문항으로 자신의 좌표를 찾고, 9성향 해설을 읽는 페이지.">
+<meta name="description" content="질서-중립-혼돈 × 선-중립-악. 16개 문항으로 자신의 좌표를 찾고, 9성향 해설을 읽는 페이지.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -635,12 +635,16 @@ const MAX = 20;
 /* 사회적 바람직성 보정.
    원점수는 선/질서 쪽으로 쏠리므로 문턱을 그쪽으로 밀어 올린다.
    즉 여기서 '악'은 절대적 악이 아니라 '같은 문항을 푼 사람들 중 자기 이익을 더 자주 택한 쪽'을 뜻한다.
+
+   제약: lo는 반드시 음수여야 한다. 모든 문항에서 가운데를 고르면 0점인데,
+         lo가 0 이상이면 그 사람이 '악'으로 판정된다.
+
    보정 강도를 바꾸려면 이 두 값만 고치면 된다.
      절대기준(보정 없음)  L:{hi:6,lo:-6}   G:{hi:6,lo:-6}
-     약한 보정            L:{hi:8,lo:-4}   G:{hi:10,lo:0}
-     중간 보정 ← 현재값   L:{hi:8,lo:-4}   G:{hi:12,lo:2}
-     강한 보정            L:{hi:10,lo:-2}  G:{hi:14,lo:6}   */
-const CUT = { L:{hi: 8, lo:-4}, G:{hi:12, lo: 2} };
+     약한 보정            L:{hi:6,lo:-4}   G:{hi:8, lo:-2}
+     중간 보정 ← 현재값   L:{hi:8,lo:-4}   G:{hi:10,lo:-2}
+     강한 보정            L:{hi:10,lo:-2}  G:{hi:14,lo:-2}   */
+const CUT = { L:{hi: 8, lo:-4}, G:{hi:10, lo:-2} };
 
 /* ================= 판 그리기 ================= */
 function buildPlate(el,small){
@@ -661,15 +665,23 @@ const resMarker=buildPlate(document.getElementById('resPlate'),false);
 
 function band(v,ax){ const c=CUT[ax]; return v>=c.hi?0 : v<=c.lo?2 : 1; }
 function keyOf(l,g){ return CELLS[band(g,'G')*3+band(l,'L')].k; }
-/* 문턱이 비대칭이므로, 마커의 시각적 위치도 구간별로 매핑해 항상 켜진 칸 안에 들어오게 한다 */
+/* 문턱이 비대칭이므로 마커 위치를 구간별로 매핑한다.
+   중립 구간을 0에서 한 번 더 쪼개, 0점이 정확히 판 정중앙(0.5)에 오게 한다.
+   그러지 않으면 중립 구간의 한가운데(예: +4)가 중앙이 되어 시작점이 치우쳐 보인다. */
 function frac(v,ax){
-  const c=CUT[ax], T=1/3;
+  const c=CUT[ax], T=1/3, H=0.5-T;   // H = 중립 구간 절반의 폭
   v=Math.max(-MAX,Math.min(MAX,v));
-  if(v>=c.hi) return (MAX-v)/Math.max(1,MAX-c.hi)*T;
-  if(v> c.lo) return T + (c.hi-v)/Math.max(1,c.hi-c.lo)*T*0.98;
-  return 2*T + T*0.02 + (c.lo-v)/Math.max(1,c.lo+MAX)*T*0.98;
+  if(v>=c.hi) return (MAX-v)/Math.max(1,MAX-c.hi)*T*0.98;   // 선/질서 칸
+  if(v>=0)    return 0.5 - (v/c.hi)*H;                       // 중립 칸 위쪽 절반
+  if(v> c.lo) return 0.5 + (v/c.lo)*H;                       // 중립 칸 아래쪽 절반
+  return 2*T + T*0.02 + (c.lo-v)/Math.max(1,c.lo+MAX)*T*0.98; // 악/혼돈 칸
 }
-function place(plate,marker,l,g){
+function place(plate,marker,l,g,blank){
+  if(blank){   /* 아직 답이 없으면 판정을 하지 않는다 — 정중앙, 켜진 칸 없음 */
+    marker.style.left='50%';marker.style.top='50%';
+    plate.querySelectorAll('.cell').forEach(c=>c.classList.remove('lit'));
+    return null;
+  }
   marker.style.left=(5+frac(l,'L')*90)+'%';
   marker.style.top =(5+frac(g,'G')*90)+'%';
   const k=keyOf(l,g);
@@ -710,11 +722,12 @@ function render(){
     $('qOpts').appendChild(b);
   });
   $('back').classList.toggle('hidden',idx===0);
-  liveMarker.classList.toggle('idle',ans.filter(v=>v!==undefined).length===0);
+  const done=ans.filter(v=>v!==undefined).length;
+  liveMarker.classList.toggle('idle',done===0);
   tally();
-  const k=place($('livePlate'),liveMarker,L,G);
+  const k=place($('livePlate'),liveMarker,L,G,done===0);
   $('liveCoord').textContent='L/C '+(L>0?'+':'')+L+' · G/E '+(G>0?'+':'')+G;
-  $('liveCell').textContent=ans.filter(v=>v!==undefined).length===0?'아직 판 한가운데':A[k].name+' 부근';
+  $('liveCell').textContent=done===0?'아직 판 한가운데':A[k].name+' 부근';
 }
 
 function choose(v){
