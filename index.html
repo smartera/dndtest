@@ -216,6 +216,48 @@ section{padding:clamp(56px,9vh,104px) 0;border-top:1px solid var(--edge)}
 .pin.b{background:var(--law);color:#0E1A15}
 .pin.both{width:auto;padding:0 8px;border-radius:11px;letter-spacing:.06em}
 .pair-actions{margin-top:30px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ---------- 입버릇 / 최선·최악 ---------- */
+.says{list-style:none;padding:0;margin:0;display:grid;gap:9px}
+.says li{
+  font-family:var(--display);font-size:1.02rem;color:#D3DAD1;line-height:1.6;
+  border-left:2px solid var(--edge);padding-left:15px;
+}
+.says li::before{content:'“';color:var(--brass);margin-right:2px}
+.says li::after{content:'”';color:var(--brass);margin-left:2px}
+.bw{display:grid;gap:16px}
+.bw>div{border-left:2px solid var(--edge);padding-left:16px}
+.bw .b{border-left-color:var(--brass)}
+.bw .w{border-left-color:var(--chaos)}
+.bw h5{font-family:var(--mono);font-weight:500;font-size:.62rem;letter-spacing:.16em;margin:0 0 7px;color:var(--bone-dim)}
+.bw .b h5{color:var(--brass)}
+.bw .w h5{color:var(--chaos)}
+.bw p{font-size:.93rem;color:#B7C1B7;line-height:1.7}
+
+/* ---------- 시나리오 ---------- */
+.scene-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+.scene-tabs button{
+  border:1px solid var(--edge);background:transparent;padding:10px 18px;border-radius:2px;
+  font-size:.86rem;color:var(--bone-dim);transition:all .18s ease;
+}
+.scene-tabs button:hover{border-color:var(--brass);color:var(--bone)}
+.scene-tabs button[aria-selected="true"]{border-color:var(--brass);background:rgba(201,162,39,.12);color:var(--bone)}
+.scene-body{border:1px solid var(--edge);background:var(--felt2);padding:clamp(22px,4vw,38px)}
+.scene-text{
+  font-family:var(--display);font-size:clamp(1.05rem,2.2vw,1.28rem);line-height:1.7;color:#D8DED6;
+  border-left:2px solid var(--brass);padding-left:20px;margin-bottom:30px;
+}
+.scene-list{list-style:none;padding:0;margin:0;display:grid;gap:2px;counter-reset:s}
+.scene-list li{
+  display:grid;grid-template-columns:112px 1fr;gap:18px;align-items:baseline;
+  padding:13px 14px;border-bottom:1px solid rgba(44,69,58,.5);transition:background .18s ease;
+}
+.scene-list li:last-child{border-bottom:0}
+.scene-list li:hover{background:rgba(255,255,255,.02)}
+.scene-list li.mine{background:rgba(201,162,39,.1);box-shadow:inset 2px 0 0 var(--brass)}
+.scene-list .who{font-family:var(--display);font-weight:700;font-size:.96rem;color:var(--bone)}
+.scene-list .who i{display:block;font-family:var(--mono);font-style:normal;font-size:.58rem;letter-spacing:.14em;color:var(--brass);margin-top:3px}
+.scene-list .act{font-size:.94rem;color:#BCC5BB;line-height:1.65}
 .block+.block{margin-top:0}
 .pairing{display:grid;gap:14px}
 .pair{display:grid;grid-template-columns:78px 1fr;gap:12px;align-items:baseline}
@@ -256,6 +298,8 @@ section{padding:clamp(56px,9vh,104px) 0;border-top:1px solid var(--edge)}
   .hero .plate-shell{max-width:420px;margin:8px auto 0}
   .side-plate{max-width:300px;margin:0 auto}
   .pair-layout .plate-shell{max-width:340px;margin:8px auto 0}
+  .scene-list li{grid-template-columns:1fr;gap:6px}
+  .scene-list .who i{display:inline;margin-left:8px}
   .picker{gap:10px}
   .picker select{min-width:0;flex:1}
   .codex{grid-template-columns:1fr}
@@ -392,11 +436,19 @@ section{padding:clamp(56px,9vh,104px) 0;border-top:1px solid var(--edge)}
   <div class="res-body">
     <div>
       <div class="block"><h4>행동 원리</h4><ul id="rPrinciples"></ul></div>
+      <div class="block" style="margin-top:32px"><h4>이런 말을 자주 합니다</h4><ul class="says" id="rSays"></ul></div>
       <div class="block" style="margin-top:32px"><h4>강점</h4><p id="rStrength"></p></div>
       <div class="block" style="margin-top:32px"><h4>그늘</h4><p id="rShadow"></p></div>
+      <div class="block" style="margin-top:32px"><h4>같은 성향, 두 얼굴</h4>
+        <div class="bw">
+          <div class="b"><h5>최선일 때</h5><p id="rBest"></p></div>
+          <div class="w"><h5>최악일 때</h5><p id="rWorst"></p></div>
+        </div>
+      </div>
     </div>
     <div>
-      <div class="block"><h4>이 성향이 부서지는 순간</h4><p id="rBreak"></p></div>
+      <div class="block"><h4>자주 받는 오해</h4><p id="rMyth"></p></div>
+      <div class="block" style="margin-top:32px"><h4>이 성향이 부서지는 순간</h4><p id="rBreak"></p></div>
       <div class="block" style="margin-top:32px"><h4>관계</h4>
         <div class="pairing">
           <div class="pair"><span>잘 맞음</span><p id="rAlly"></p></div>
@@ -466,11 +518,27 @@ section{padding:clamp(56px,9vh,104px) 0;border-top:1px solid var(--edge)}
 </div>
 </section>
 
+<!-- ============ SCENARIOS ============ -->
+<section id="scenes">
+<div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">06</span>
+    <h2>같은 상황, 아홉 개의 답</h2>
+    <p class="note">하나의 상황을 아홉 성향이 각각 어떻게 처리하는지 나란히 놓았습니다.</p>
+  </div>
+  <div class="scene-tabs" id="sceneTabs"></div>
+  <div class="scene-body">
+    <p class="scene-text" id="sceneText"></p>
+    <ol class="scene-list" id="sceneList"></ol>
+  </div>
+</div>
+</section>
+
 <!-- ============ FOOT ============ -->
 <div class="wrap">
 <footer class="foot">
   <span class="eyebrow">읽는 법</span>
-  <p>점수는 절대 기준이 아니라 상대 기준입니다. 사람들의 답은 원래 &lsquo;선&rsquo;과 &lsquo;질서&rsquo; 쪽으로 크게 쏠리기 때문에, 그대로 재면 대부분 질서 선 한 칸에 몰립니다. 그래서 문턱을 그쪽으로 밀어 올렸습니다. 여기서 &lsquo;악&rsquo;은 나쁜 사람이라는 뜻이 아니라 <b>같은 문항에서 자기 몫을 더 자주 택한 쪽</b>, &lsquo;혼돈&rsquo;은 <b>규칙보다 자기 판단을 더 자주 택한 쪽</b>이라는 뜻입니다.</p>
+  <p>질서–혼돈 축은 있는 그대로 잽니다. 선–악 축만 상대 기준입니다. 사람들의 답은 원래 &lsquo;선&rsquo; 쪽으로 크게 쏠려서, 그대로 재면 대부분 한 칸에 몰리기 때문입니다. 그래서 이 축의 문턱만 위로 밀었고, 여기서 &lsquo;악&rsquo;은 나쁜 사람이라는 뜻이 아니라 <b>같은 문항에서 자기 몫을 더 자주 택한 쪽</b>이라는 뜻입니다.</p>
   <p>성향은 사람을 가두는 상자가 아니라 &lsquo;평소의 기본값&rsquo;에 가깝습니다. D&amp;D에서도 캐릭터는 사건을 겪으며 칸을 옮겨 다니고, 최근 판본은 성향을 규칙적 제약이 아니라 연기의 참고선으로 다룹니다. 경계에 걸린 결과라면 두 칸을 모두 읽어보는 편이 더 정확합니다.</p>
 </footer>
 </div>
@@ -493,6 +561,10 @@ LG:{name:'질서 선',en:'Lawful Good',epithet:'수호자',
  ally:'중립 선 · 질서 중립. 목적을 공유하거나 방법을 공유합니다.',
  friction:'혼돈 중립 · 혼돈 악. 약속이 성립하지 않는 상대를 가장 다루기 어려워합니다.',
  cls:'팔라딘, 클레릭',
+ says:['약속했으니 지켜야죠.','절차대로 하면 나중에 아무도 안 다칩니다.','그건 제가 책임지겠습니다.'],
+ best:'모두가 흔들릴 때 기준점이 되어 줍니다. 이 사람이 자리를 지키고 있으면 나머지가 판단을 아낄 수 있습니다.',
+ worst:'규칙을 지켰다는 사실을 방패로 씁니다. 절차대로 했으니 결과는 내 책임이 아니라고 말하기 시작합니다.',
+ myth:'융통성 없다는 말을 듣습니다. 하지만 이 성향이 규칙을 굽히지 않는 건, 한 번 만든 예외가 다음 사람에게도 적용된다는 걸 알기 때문입니다. 자기만 편하려고 굽히지 않는 것뿐입니다.',
  people:[['이순신','역사','파직과 투옥을 겪고도 직분과 군율을 그대로 지켰다. 제도가 자신을 배신했을 때도 제도를 버리지 않은 쪽.'],['세종','역사','백성을 위한 개혁을 제도의 방식으로 밀었다. 공법 시행 전 17만 명에게 찬반을 물은 여론조사가 대표적이다.'],['마르쿠스 아우렐리우스','역사','최고 권력자이면서 스스로에게 가장 엄격한 규범을 적용했다. 권한을 의무의 다른 이름으로 이해한 사례.'],['토머스 모어','역사','왕의 요구를 법 해석과 양심으로 거부하다 처형됐다. 침묵으로 버틴 마지막까지 절차 안에 있었다.'],['조지 워싱턴','역사','더 할 수 있는 자리에서 스스로 물러나 임기 제한의 선례를 만들었다. 권력을 규칙으로 되돌린 쪽.'],['아서 왕과 원탁의 기사','허구','개인의 무력을 서약에 묶어두는 구조 자체가 이 성향의 정의에 가깝다.'],['관우 (『삼국지연의』)','허구','조조에게 받은 은혜를 갚은 뒤에야 떠났다. 명분과 의리의 순서를 어기지 않은 인물.'],['이몽룡 (『춘향전』)','허구','사적인 원한을 사적으로 갚지 않고 암행어사라는 공적 절차로 처리한다.']]},
 
 NG:{name:'중립 선',en:'Neutral Good',epithet:'조력자',
@@ -504,6 +576,10 @@ NG:{name:'중립 선',en:'Neutral Good',epithet:'조력자',
  ally:'질서 선 · 혼돈 선. 방법은 달라도 같은 방향을 봅니다.',
  friction:'중립 악. 계산 구조가 같고 부호만 반대라 가장 정면으로 충돌합니다.',
  cls:'클레릭, 드루이드, 바드',
+ says:['일단 누가 제일 급한지 봅시다.','규정은 나중에 맞추고, 사람부터요.','제가 좀 도울 수 있을 것 같은데요.'],
+ best:'진영이 갈린 자리에서 양쪽과 말이 통하는 거의 유일한 사람입니다. 상황을 몇 도쯤 낫게 만들어 놓고 조용히 빠집니다.',
+ worst:'돕는 일이 참견이 됩니다. 상대가 스스로 정할 문제까지 대신 결정해놓고 선의였다고 말합니다.',
+ myth:'물렁하다는 말을 듣습니다. 그런데 매번 손해를 감수하는 쪽을 고르기 때문에, 실제로는 아홉 칸 중 대가를 가장 자주 치르는 자리입니다.',
  people:[['앙리 뒤낭','역사','솔페리노 전장에서 적군과 아군을 가리지 않고 부상병을 돌본 경험에서 적십자를 만들었다.'],['플로렌스 나이팅게일','역사','통계와 행정을 무기로 군 의료를 뜯어고쳤다. 제도를 숭배하지도 부수지도 않고 도구로 쓴 쪽.'],['오스카 쉰들러','역사','나치 당원이자 사업가로서 뇌물과 장부 조작을 동원해 1,100여 명을 살렸다.'],['유일한','역사','기업을 일으킨 뒤 지분 대부분을 사회에 넘겼다. 축적의 목적을 바깥에 둔 사례.'],['장기려','역사','가난한 환자를 돌려보내지 않으려 진료비를 대신 냈고, 뒤에는 아예 의료보험 조합을 만들었다.'],['미리엘 주교 (『레 미제라블』)','허구','장발장의 절도를 덮어주며 법이 아니라 사람을 먼저 구했다.'],['심청 (『심청전』)','허구','규범이나 명분이 아니라 한 사람을 위해 자기 목숨을 계산에서 뺐다.'],['전장의 의무병','허구','어느 편인지보다 누가 다쳤는지를 먼저 보는 자리. 이 성향의 가장 단순한 형태.']]},
 
 CG:{name:'혼돈 선',en:'Chaotic Good',epithet:'반항아',
@@ -515,6 +591,10 @@ CG:{name:'혼돈 선',en:'Chaotic Good',epithet:'반항아',
  ally:'중립 선 · 혼돈 중립.',
  friction:'질서 중립 · 질서 악. 절차 자체를 무기로 쓰는 상대를 가장 못 견딥니다.',
  cls:'로그, 바드, 레인저',
+ says:['일단 제가 해볼게요.','그건 나중에 사과하면 됩니다.','누가 그렇게 정했는데요?'],
+ best:'아무도 못 움직일 때 혼자 움직여서 판을 엽니다. 나중에 돌아보면 그때 누가 나섰기 때문에 일이 풀린 경우가 많습니다.',
+ worst:'자기 확신을 검증할 장치가 없습니다. 규칙을 어긴 것이 정의였는지 그냥 편한 쪽이었는지 스스로 구분하지 못합니다.',
+ myth:'충동적이라는 말을 듣지만, 대개는 이미 판단이 끝난 상태입니다. 다만 그 판단을 남에게 승인받는 절차를 건너뛸 뿐입니다.',
  people:[['해리엇 터브먼','역사','도망노예법이 시퍼렇게 살아 있던 시기에 그 법을 정면으로 어기며 수십 명을 북부로 빼돌렸다.'],['안중근','역사','통치 질서 바깥에서 행동했지만 스스로를 범죄자가 아닌 군인으로 규정하며 재판에 임했다.'],['전봉준','역사','절차가 막히자 절차 밖으로 나가 봉기를 조직하고 폐정 개혁을 요구했다.'],['마하트마 간디','역사','법을 몰래 어기는 대신 공개적으로 어기고 처벌을 받았다. 질서 선과의 경계에 걸친 사례.'],['임꺽정','역사','조선 중기의 도적. 수탈 구조에 대한 저항으로 읽히기도 하지만 기록이 관 쪽에 치우쳐 있다.'],['로빈 후드','허구','법을 어기면서 정의를 주장하는 가장 오래된 원형.'],['홍길동 (『홍길동전』)','허구','신분 질서를 인정하지 않고 아예 바깥에 새 나라를 세운다.'],['장발장 (『레 미제라블』)','허구','전과와 가명을 안고도 남을 구하는 쪽을 반복해서 택한다.']]},
 
 LN:{name:'질서 중립',en:'Lawful Neutral',epithet:'심판자',
@@ -526,6 +606,10 @@ LN:{name:'질서 중립',en:'Lawful Neutral',epithet:'심판자',
  ally:'질서 선 · 질서 악. 선악이 달라도 절차 언어가 통합니다.',
  friction:'혼돈 계열 전부.',
  cls:'몽크, 위저드, 파이터',
+ says:['그건 제 권한 밖입니다.','규정 몇 조인지 확인해 주시겠어요?','선례가 있습니까?'],
+ best:'압력이 들어와도 기준이 그대로입니다. 이 사람이 검토했다는 말 자체가 신뢰가 됩니다.',
+ worst:'잘못 설계된 규칙을 성실하게 집행합니다. 사람이 다치는 걸 보면서도 자기 권한이 아니라고 말합니다.',
+ myth:'차갑고 관료적이라는 말을 듣습니다. 그런데 이 성향이 없으면 계약도 재판도 회계도 성립하지 않습니다. 감정을 안 쓰는 것이 아니라, 감정으로 기준을 흔들지 않는 것입니다.',
  people:[['상앙 (商鞅)','역사','신분을 가리지 않는 법 집행으로 진(秦)을 재편했고, 끝내 자신이 만든 법에 걸려 죽었다.'],['한비자','역사','통치자의 선의가 아니라 법과 제도의 작동을 신뢰해야 한다고 주장했다.'],['유스티니아누스 1세','역사','흩어진 로마법을 집대성해 이후 천 년의 법 체계를 남겼다. 체계를 만드는 일 자체가 업적인 쪽.'],['정도전','역사','새 왕조를 사람이 아니라 법전과 관제 위에 세우려 했다.'],['오토 폰 비스마르크','역사','이념보다 체제의 유지와 세력 균형을 상수로 두고 움직였다.'],['자베르 (『레 미제라블』)','허구','법을 세계의 뼈대로 삼았고, 그 뼈대가 흔들리자 자신이 무너졌다.'],['제갈량 (『삼국지연의』)','허구','아끼던 마속을 군율대로 벤 읍참마속이 이 성향의 핵심 장면이다.'],['라다만티스 (그리스 신화)','허구','저승의 재판관. 죽은 자를 감정 없이 같은 기준으로 판별한다.']]},
 
 TN:{name:'진정 중립',en:'True Neutral',epithet:'균형자',
@@ -537,6 +621,10 @@ TN:{name:'진정 중립',en:'True Neutral',epithet:'균형자',
  ally:'거의 모두. 대신 어느 쪽에서도 완전한 아군으로는 세지 않습니다.',
  friction:'헌신을 요구하는 극단 성향.',
  cls:'드루이드, 위저드',
+ says:['양쪽 말을 다 들어봐야죠.','굳이 지금 정해야 하나요?','저는 어느 쪽도 아닙니다.'],
+ best:'과열된 자리에서 혼자 온도가 낮습니다. 아무도 안 하던 질문을 던져 논의를 원점으로 돌립니다.',
+ worst:'균형이 방관이 됩니다. 판단을 미루는 것이 습관이 되어, 나중에는 아무 입장도 남지 않습니다.',
+ myth:'우유부단하다는 말을 듣습니다. 하지만 이 성향은 하나의 원리로 모든 상황이 설명된다고 믿지 않는 쪽입니다. 결정을 못 하는 것과 서두르지 않는 것은 다릅니다.',
  people:[['에라스뮈스','역사','종교개혁이 유럽을 둘로 가를 때 양쪽의 요구를 모두 거절했고, 양쪽에서 배신자로 불렸다.'],['몽테뉴','역사','판단을 서두르지 않는 태도 자체를 방법으로 삼았다. 중립이 무관심이 아니라 훈련일 수 있음을 보여준 쪽.'],['피론','역사','회의주의의 시조. 어느 주장에도 최종적으로 동의하지 않는 상태를 목표로 삼았다.'],['장자','역사','옳고 그름의 구분 자체를 인위적인 것으로 보았다.'],['최명길','역사','명분이 지배하던 조정에서 화친을 주장해 나라를 존속시켰고, 그 대가로 오래 비난받았다.'],['헤스티아 (그리스 신화)','허구','화로의 여신. 올림포스의 분쟁과 권력 다툼에 끝내 끼어들지 않는다.'],['사마휘 (『삼국지연의』)','허구','인재를 알아보고 길을 알려주되 어느 진영에도 자기를 걸지 않는다.'],['순환을 지키는 드루이드','허구','어느 쪽도 완전히 이기지 않게 하는 역할. 균형이 목적인 자리.']]},
 
 CN:{name:'혼돈 중립',en:'Chaotic Neutral',epithet:'자유인',
@@ -548,6 +636,10 @@ CN:{name:'혼돈 중립',en:'Chaotic Neutral',epithet:'자유인',
  ally:'혼돈 선 · 진정 중립.',
  friction:'질서 계열 전부. 특히 위계 조직 안에서는 오래 버티지 못합니다.',
  cls:'바바리안, 로그, 소서러',
+ says:['그건 그때 가서 정하죠.','저는 빠지겠습니다.','왜 꼭 그래야 하는데요?'],
+ best:'남들이 상상하지 못한 선택지를 꺼냅니다. 규칙에 갇힌 국면을 물리적으로 흔들어 엽니다.',
+ worst:'같이 계획을 세운 사람들이 반복해서 대가를 치릅니다. 자유가 결국 아무도 남지 않는 상태로 돌아옵니다.',
+ myth:'무책임하다는 말을 듣습니다. 다만 이 성향은 애초에 책임을 맡겠다고 한 적이 없는 경우가 많습니다. 문제는 주변이 그렇게 들었다는 데 있습니다.',
  people:[['디오게네스','역사','통 속에 살며 권력자에게 비켜달라고 요구했다. 지위와 소속을 자발적으로 버린 극단적 사례.'],['김삿갓 (김병연)','역사','과거와 가문과 정착을 모두 놓고 평생을 떠돌았다.'],['이백','역사','관직에 매이기를 거부하고 술과 유랑 쪽을 택했다.'],['프랑수아 비용','역사','중세의 시인이자 상습 범죄자. 추방과 사면을 오가며 어디에도 정착하지 않았다.'],['카사노바','역사','도시와 신분과 직업을 계속 갈아치우며 살았다. 목표가 아니라 이동 자체가 삶의 형태였던 쪽.'],['오디세우스 (『오디세이아』)','허구','규범보다 기지와 그때그때의 판단으로 움직인다.'],['손오공 (『서유기』)','허구','천상의 위계를 통째로 뒤집어엎고, 끝내 굴레를 씌워야 다스려진다.'],['허클베리 핀','허구','문명과 규범 자체가 답답해서 계속 강 아래로 도망친다.']]},
 
 LE:{name:'질서 악',en:'Lawful Evil',epithet:'지배자',
@@ -559,6 +651,10 @@ LE:{name:'질서 악',en:'Lawful Evil',epithet:'지배자',
  ally:'질서 중립. 절차를 공유하는 한 오래 협력합니다.',
  friction:'혼돈 선. 이 조합이 이야기에서 가장 자주 부딪힙니다.',
  cls:'클레릭, 파이터, 워락',
+ says:['계약서에 그렇게 되어 있습니다.','규정상 문제될 것 없습니다.','제 선에서 정리해 드리죠.'],
+ best:'약속을 지킵니다. 조건만 명확하면 이 사람만큼 계산이 맞는 상대도 없습니다.',
+ worst:'제도를 정교하게 쓸수록 피해가 조용해집니다. 자기 손에 아무것도 묻히지 않고 큰 손해를 남에게 넘깁니다.',
+ myth:'악당으로 읽히지만 현실에서는 가장 협상 가능한 상대입니다. 조건이 분명하면 약속을 지키고, 그래서 아홉 칸 중 가장 오래 살아남습니다.',
  people:[['아돌프 아이히만','역사','서류와 명령 계통을 따라 대량학살의 수송을 관리했고, 재판에서 절차를 이행했을 뿐이라고 주장했다.'],['이완용','역사','폭력이 아니라 조약과 관직, 합법적 절차를 통해 국권 이양을 완성했다.'],['토마스 데 토르케마다','역사','종교재판을 정교한 심문 규정과 문서 체계 위에 올려놓았다. 잔혹함이 서식으로 관리된 사례.'],['레오폴 2세','역사','콩고자유국을 개인 소유로 삼아 법적 형식을 갖춘 채 착취를 운영했다.'],['로베스피에르','역사','공포정치를 혁명 법정의 이름으로 집행했다. 다만 그를 어느 칸에 둘지는 평가가 갈린다.'],['이아고 (『오셀로』)','허구','규범과 신뢰 구조를 부수지 않고 그대로 이용해 사람을 무너뜨린다.'],['메피스토펠레스 (『파우스트』)','허구','계약을 정확히 지키면서 상대를 파멸로 데려간다.'],['조조 (『삼국지연의』)','허구','법과 제도를 세우되 그 목적이 자기 패권에 있는 인물로 그려진다.']]},
 
 NE:{name:'중립 악',en:'Neutral Evil',epithet:'실리주의자',
@@ -570,6 +666,10 @@ NE:{name:'중립 악',en:'Neutral Evil',epithet:'실리주의자',
  ally:'없음에 가깝습니다. 이해가 겹치는 동안만 동맹입니다.',
  friction:'중립 선. 같은 상황을 정확히 반대로 계산합니다.',
  cls:'로그, 위저드, 어쌔신',
+ says:['그게 저한테 무슨 이득이죠?','지금은 이쪽이 유리합니다.','그건 제가 관여할 일이 아닌 것 같은데요.'],
+ best:'군더더기가 없습니다. 체면이나 감정 때문에 손해 보는 결정을 하지 않아서, 위기에서 판단이 빠릅니다.',
+ worst:'같은 계산을 상대도 한다는 사실을 잊습니다. 아무도 이 사람을 위해 위험을 감수하지 않게 되어 결국 혼자 남습니다.',
+ myth:'차갑다는 말을 듣지만, 실제로는 지키지 못할 약속을 하지 않는 쪽에 가깝습니다. 감정으로 부풀려 말한 뒤 못 지키는 사람보다 예측 가능합니다.',
  people:[['탈레랑','역사','왕정·혁명정부·나폴레옹·왕정복고를 차례로 섬기며 매번 다음 승자 쪽으로 옮겨갔다.'],['알키비아데스','역사','아테네에서 스파르타로, 다시 페르시아로. 이익이 있는 쪽이 곧 조국이었다.'],['베네딕트 아널드','역사','전공을 세운 장군이었지만 대가를 약속받고 요새를 넘기려 했다.'],['바실 자하로프','역사','같은 무기를 대립하는 양쪽에 함께 팔아 죽음의 상인으로 불렸다.'],['알렉산데르 6세','역사','교황직을 가문의 사업 기반으로 운용했다. 규범을 지키지도 부수지도 않고 그때그때 값을 매긴 쪽.'],['클로디어스 (『햄릿』)','허구','형을 죽이고 왕관과 왕비를 함께 가져간다. 광기가 아니라 계산이다.'],['여포 (『삼국지연의』)','허구','이익을 따라 주군을 거듭 갈아치웠고, 그래서 아무도 그를 위해 나서지 않았다.'],['전쟁으로 이익을 얻는 상인','허구','승패보다 정산에 관심이 있는 자리.']]},
 
 CE:{name:'혼돈 악',en:'Chaotic Evil',epithet:'파괴자',
@@ -581,6 +681,10 @@ CE:{name:'혼돈 악',en:'Chaotic Evil',epithet:'파괴자',
  ally:'없습니다. 공포로 유지되는 관계뿐입니다.',
  friction:'전부. 특히 질서 계열은 이 성향을 제거 대상으로 다룹니다.',
  cls:'바바리안, 워락, 소서러',
+ says:['그래서 어쩌라고요.','막을 수 있으면 막아보시죠.','이미 했습니다.'],
+ best:'억제기가 없어서 아무도 못 건드리는 것을 건드립니다. 판을 통째로 갈아엎어야 하는 국면에서만 유일하게 움직입니다.',
+ worst:'목적조차 남지 않습니다. 무엇을 얻으려던 것인지 잊고 부수는 일 자체가 목적이 됩니다.',
+ myth:'미쳤다고 읽히지만 대개는 잃을 것이 없어진 상태입니다. 이 칸에 들어오는 과정에는 보통 그 전의 이야기가 있습니다.',
  people:[['칼리굴라','역사','권력에 어떤 제약도 두지 않았다고 전한다. 다만 사료 대부분이 그를 적대한 원로원 쪽에서 나왔다.'],['궁예','역사','스스로 미륵을 자처하며 측근과 가족까지 숙청했다고 전한다. 이 기록 역시 그를 무너뜨린 고려 측 정리다.'],['이반 4세','역사','친위 조직을 풀어 도시 하나를 통째로 학살했고, 끝내 자기 아들까지 죽였다.'],['티무르','역사','저항한 도시를 몰살하고 해골로 탑을 쌓아 공포 자체를 통치 수단으로 삼았다.'],['질 드 레','역사','전쟁 영웅에서 연쇄살인범으로 기록됐다. 다만 재판이 재산 몰수를 노린 것이라는 반론이 있다.'],['맥베스 후반 (『맥베스』)','허구','억제를 잃은 뒤에는 목적도 남지 않고 파괴만 남는다.'],['사탄 (『실낙원』)','허구','무엇을 얻기 위해서가 아니라 질서를 부수기 위해 움직인다.'],['에리스 (그리스 신화)','허구','불화의 여신. 사과 하나를 던져 전쟁을 일으키는 것으로 충분하다.']]}
 };
 
@@ -632,19 +736,20 @@ const Q = [
 ];
 
 const MAX = 20;
-/* 사회적 바람직성 보정.
-   원점수는 선/질서 쪽으로 쏠리므로 문턱을 그쪽으로 밀어 올린다.
-   즉 여기서 '악'은 절대적 악이 아니라 '같은 문항을 푼 사람들 중 자기 이익을 더 자주 택한 쪽'을 뜻한다.
+/* 질서–혼돈 축(L)은 보정하지 않는다. 대칭(±6)이라 0점이 정확히 중립 한가운데다.
+   선–악 축(G)만 보정한다. 실제 응답이 '선' 쪽으로 크게 쏠려서, 그대로 재면
+   대부분 한 칸에 몰리기 때문이다. 따라서 여기서 '악'은 절대적 악이 아니라
+   '같은 문항에서 자기 몫을 더 자주 택한 쪽'을 뜻한다.
 
-   제약: lo는 반드시 음수여야 한다. 모든 문항에서 가운데를 고르면 0점인데,
+   제약: G의 lo는 반드시 음수여야 한다. 모든 문항에서 가운데를 고르면 0점인데,
          lo가 0 이상이면 그 사람이 '악'으로 판정된다.
 
-   보정 강도를 바꾸려면 이 두 값만 고치면 된다.
-     절대기준(보정 없음)  L:{hi:6,lo:-6}   G:{hi:6,lo:-6}
-     약한 보정            L:{hi:6,lo:-4}   G:{hi:8, lo:-2}
-     중간 보정 ← 현재값   L:{hi:8,lo:-4}   G:{hi:10,lo:-2}
-     강한 보정            L:{hi:10,lo:-2}  G:{hi:14,lo:-2}   */
-const CUT = { L:{hi: 8, lo:-4}, G:{hi:10, lo:-2} };
+   G 보정 강도를 바꾸려면 이 값만 고치면 된다.
+     보정 없음   G:{hi:6, lo:-6}
+     약한 보정   G:{hi:8, lo:-2}
+     중간 보정   G:{hi:10,lo:-2}   ← 현재값
+     강한 보정   G:{hi:14,lo:-2}   */
+const CUT = { L:{hi: 6, lo:-6}, G:{hi:10, lo:-2} };
 
 /* ================= 판 그리기 ================= */
 function buildPlate(el,small){
@@ -762,6 +867,10 @@ function finish(l,g,pushUrl){
   $('rLine').textContent=a.line;
   $('rPrinciples').innerHTML=a.principles.map(p=>'<li>'+p+'</li>').join('');
   $('rStrength').textContent=a.strength;
+  $('rSays').innerHTML=a.says.map(s=>'<li>'+s+'</li>').join('');
+  $('rBest').textContent=a.best;
+  $('rWorst').textContent=a.worst;
+  $('rMyth').textContent=a.myth;
   $('rShadow').textContent=a.shadow;
   $('rBreak').textContent=a.brk;
   $('rAlly').textContent=a.ally;
@@ -778,6 +887,7 @@ function finish(l,g,pushUrl){
   if(ru) txt+=' 한 칸 옆은 '+A[ru].name+'입니다.';
   $('rEdge').textContent=txt;
   place($('resPlate'),resMarker,l,g);
+  if(typeof renderScene==='function') renderScene();
   show('result');
   if(pushUrl){
     const u=new URL(location.href);
@@ -828,29 +938,44 @@ $('copyText').onclick=()=>{
 /* ================= 도감 ================= */
 const grid=$('codexGrid');
 let openKey=null;
+const cards=[];
+const panel=document.createElement('div');
+panel.className='cx-detail';
+
 CELLS.forEach((c,i)=>{
   const a=A[c.k];
   const b=document.createElement('button');
   b.className='cx';b.type='button';b.setAttribute('aria-expanded','false');b.dataset.k=c.k;
   b.innerHTML='<span class="c">'+c.k+' · '+a.en.toUpperCase()+'</span><span class="n">'+a.name+' — '+a.epithet+'</span><span class="e">'+a.line.split('.')[0]+'.</span>';
   b.onclick=()=>toggle(c.k,i);
-  grid.appendChild(b);
-  if(i%3===2){ const d=document.createElement('div');d.className='cx-detail';d.dataset.row=Math.floor(i/3);grid.appendChild(d); }
+  grid.appendChild(b);cards.push(b);
 });
+
+/* 패널은 하나만 두고 클릭할 때마다 옮긴다.
+   3열(데스크톱)에서는 해당 행의 마지막 카드 뒤, 1열(모바일)에서는 클릭한 카드 바로 뒤.
+   패널을 3개마다 고정으로 심어두면 열 수가 바뀌는 순간 위치가 어긋난다. */
+function cols(){ return window.matchMedia('(max-width:860px)').matches?1:3; }
+function mountPanel(i){
+  const n=cols(), tgt=n===1?i:Math.min(CELLS.length-1,Math.floor(i/n)*n+n-1);
+  grid.insertBefore(panel,cards[tgt].nextSibling);
+}
+
 function toggle(k,i){
-  const row=Math.floor(i/3);
-  const panel=grid.querySelector('.cx-detail[data-row="'+row+'"]');
   grid.querySelectorAll('.cx').forEach(x=>x.setAttribute('aria-expanded','false'));
-  grid.querySelectorAll('.cx-detail').forEach(p=>{ if(p!==panel)p.classList.remove('on'); });
   if(openKey===k){ panel.classList.remove('on');openKey=null;return; }
+  mountPanel(i);
   const a=A[k];
   panel.innerHTML='<div class="sub">'+k+' · '+a.en.toUpperCase()+'</div><h3>'+a.name+' — '+a.epithet+'</h3>'+
     '<p style="margin-top:12px;color:#CFD6CC">'+a.line+'</p>'+
     '<div class="body">'+
       '<div><div class="block"><h4>행동 원리</h4><ul>'+a.principles.map(p=>'<li>'+p+'</li>').join('')+'</ul></div>'+
-      '<div class="block" style="margin-top:24px"><h4>강점</h4><p>'+a.strength+'</p></div>'+
+      '<div class="block" style="margin-top:24px"><h4>이런 말을 자주 합니다</h4><ul class="says">'+a.says.map(s=>'<li>'+s+'</li>').join('')+'</ul></div>'+
+      '<div class="block" style="margin-top:24px"><h4>같은 성향, 두 얼굴</h4><div class="bw">'+
+        '<div class="b"><h5>최선일 때</h5><p>'+a.best+'</p></div>'+
+        '<div class="w"><h5>최악일 때</h5><p>'+a.worst+'</p></div></div></div>'+
       '<div class="block" style="margin-top:24px"><h4>그늘</h4><p>'+a.shadow+'</p></div></div>'+
-      '<div><div class="block"><h4>부서지는 순간</h4><p>'+a.brk+'</p></div>'+
+      '<div><div class="block"><h4>자주 받는 오해</h4><p>'+a.myth+'</p></div>'+
+      '<div class="block" style="margin-top:24px"><h4>부서지는 순간</h4><p>'+a.brk+'</p></div>'+
       '<div class="block" style="margin-top:24px"><h4>관계</h4><div class="pairing">'+
         '<div class="pair"><span>잘 맞음</span><p>'+a.ally+'</p></div>'+
         '<div class="pair"><span>부딪힘</span><p>'+a.friction+'</p></div></div></div>'+
@@ -861,6 +986,13 @@ function toggle(k,i){
   grid.querySelector('.cx[data-k="'+k+'"]').setAttribute('aria-expanded','true');
   openKey=k;
 }
+/* 회전이나 창 크기 변경으로 열 수가 바뀌면 열려 있던 패널을 다시 붙인다 */
+let rt;
+window.addEventListener('resize',()=>{
+  if(!openKey)return;
+  clearTimeout(rt);
+  rt=setTimeout(()=>mountPanel(CELLS.findIndex(c=>c.k===openKey)),150);
+});
 
 /* ================= 궁합 ================= */
 /* 45개 조합을 일일이 쓰는 대신, 두 축의 거리로 관계 유형을 정하고
@@ -974,6 +1106,56 @@ $('copyPair').onclick=()=>{
   copy(A[k1].name+' × '+A[k2].name+' — '+TYPES[Math.abs(IDX[k1][1]-IDX[k2][1])+'-'+Math.abs(IDX[k1][0]-IDX[k2][0])].t+'\n'+location.href,'복사됨','toast2');
 };
 renderPair();
+
+/* ================= 시나리오 ================= */
+const SCENES=[
+{tab:'창고 열쇠',
+ text:'성 안 창고에 남은 배급이 절반뿐이다. 영주는 등록된 시민에게만 나눠주라고 명했고, 성문 밖에는 등록되지 않은 피난민이 모여 있다. 창고 열쇠는 당신이 가지고 있다.',
+ r:{LG:'명령대로 집행하되, 등록 절차를 앞당기자고 그날 밤 영주에게 정식으로 올린다.',
+    NG:'자기 몫과 남는 분량을 떼어 성문 밖으로 내보낸다. 기록에는 남기지 않는다.',
+    CG:'밤에 창고를 연다. 아침에 벌을 받을 것도 알고 있다.',
+    LN:'명단에 없으면 주지 않는다. 예외는 명령권자가 만들 일이다.',
+    TN:'정해진 만큼만 나눠주고 논쟁에서 빠진다. 성문 밖 일은 성문 밖에서 정해질 것이다.',
+    CN:'자기 몫을 챙겨 성을 떠난다. 남의 배급을 지키는 건 자기 일이 아니다.',
+    LE:'등록 절차를 유료로 만든다. 규정 어디에도 어긋나지 않는다.',
+    NE:'남는 분량을 빼돌려 성문 밖에 판다. 어차피 굶는 건 마찬가지다.',
+    CE:'창고에 불을 지르고, 혼란 중에 필요한 만큼 챙긴다.'}},
+{tab:'동료의 손',
+ text:'오래 함께 일한 동료가 회사 돈에 손을 댔다는 것을 알게 됐다. 액수는 크지 않고, 그의 집안 사정도 안다. 아직 아무도 모른다.',
+ r:{LG:'본인에게 먼저 말하고 자진 신고할 시간을 준다. 안 하면 내가 보고한다.',
+    NG:'액수를 대신 메워주고, 다시는 안 하겠다는 약속을 받는다.',
+    CG:'덮어준다. 대신 그 돈이 어디에 쓰였는지는 끝까지 확인한다.',
+    LN:'규정대로 보고한다. 사정은 징계 절차에서 참작될 일이다.',
+    TN:'본인에게만 알린다. 그 다음은 그의 몫이다.',
+    CN:'못 본 척한다. 남의 인생에 개입할 이유가 없다.',
+    LE:'알고 있다는 사실만 알려준다. 앞으로 그는 내 부탁을 거절하지 못한다.',
+    NE:'조용히 덮어주는 대가로 몫을 요구한다.',
+    CE:'소문을 내고, 무너지는 과정을 구경한다.'}},
+{tab:'무너지는 다리',
+ text:'무너지기 직전인 다리 건너편에 사람들이 갇혀 있다. 지금 건너가면 구할 수 있지만, 무게를 못 견디면 다리와 함께 모두 떨어진다. 뒤에는 당신이 데려온 일행이 있다.',
+ r:{LG:'일행에게 남으라고 명령하고 혼자 건넌다. 데려온 사람을 위험에 넣지 않는다.',
+    NG:'가장 가벼운 사람 한 명만 데리고 간다. 계산이 서는 최대치까지만.',
+    CG:'아무한테도 안 알리고 먼저 건넌다. 말리면 못 가니까.',
+    LN:'구조 절차를 확인한다. 무단으로 건너면 양쪽을 다 잃는다.',
+    TN:'다리 상태를 먼저 잰다. 확률이 반반이면 건너지 않는다.',
+    CN:'건널지 말지는 각자 정하자고 하고, 자기는 가지 않는다.',
+    LE:'건너는 조건을 협상한다. 구조에는 대가가 따른다.',
+    NE:'건너지 않는다. 돌아가서 시도했다고 보고하면 된다.',
+    CE:'일행을 먼저 보내 다리가 버티는지 본다.'}}
+];
+let sceneIdx=0;
+function renderScene(){
+  const s=SCENES[sceneIdx], mine=(ans.filter(v=>v!==undefined).length===Q.length)?keyOf(L,G):null;
+  $('sceneTabs').innerHTML=SCENES.map((x,i)=>
+    '<button type="button" role="tab" aria-selected="'+(i===sceneIdx)+'" data-i="'+i+'">'+x.tab+'</button>').join('');
+  $('sceneTabs').querySelectorAll('button').forEach(b=>
+    b.onclick=()=>{ sceneIdx=+b.dataset.i;renderScene(); });
+  $('sceneText').textContent=s.text;
+  $('sceneList').innerHTML=CELLS.map(c=>
+    '<li class="'+(c.k===mine?'mine':'')+'"><span class="who">'+A[c.k].name+'<i>'+c.k+'</i></span>'+
+    '<span class="act">'+s.r[c.k]+'</span></li>').join('');
+}
+renderScene();
 
 /* ================= 공유 링크로 들어온 경우 ================= */
 (function(){
